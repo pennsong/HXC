@@ -115,39 +115,39 @@ var app = angular.module('starter', ['ionic', 'ngCordova'])
     });
 
 app.controller('baseCtrl', function ($scope, $rootScope, $state, $ionicPopup, $http) {
-    $rootScope.token = null;
+    $rootScope.r_token = null;
 
-    $rootScope.username = window.localStorage['username'] || '';
+    $rootScope.r_username = window.localStorage['username'] || '';
 
-    $rootScope.lastLocation = {
+    $rootScope.r_lastLocation = {
         lng: null,
         lat: null
     }
 
-    $rootScope.curMeet = null;
+    $rootScope.r_curMeet = null;
 
-    $rootScope.searchMode = null;
+    $rootScope.r_searchMode = null;
 
-    $rootScope.curOptions = [];
-    $rootScope.curOptionName = null;
+    $rootScope.r_curOptions = [];
+    $rootScope.r_curOptionName = null;
 
-    $rootScope.mainInfo = null;
+    $rootScope.r_mainInfo = null;
 
-    $rootScope.serverRoot = "http://192.168.1.20:3000/";
-    $rootScope.imagePath = $rootScope.serverRoot + 'images/';
-    $rootScope.sysImagePath = $rootScope.serverRoot + 'images/system/';
+    $rootScope.r_serverRoot = "http://192.168.1.20:3000/";
+    $rootScope.r_imagePath = $rootScope.r_serverRoot + 'images/';
+    $rootScope.r_sysImagePath = $rootScope.r_serverRoot + 'images/system/';
 
-    $rootScope.curOptions = [];
-    $rootScope.curOptionName = null;
+    $rootScope.r_curOptions = [];
+    $rootScope.r_curOptionName = null;
 
-    $rootScope.curChatFriendUsername = null;
+    $rootScope.r_curChatFriendUsername = null;
 
-    $rootScope.myLocation = {
+    $rootScope.r_myLocation = {
         lng: null,
         lat: null
     }
 
-    $rootScope.myInfo = {
+    $rootScope.r_myInfo = {
         "specialInfo": {
             "sex": null,
             "clothesColor": null,
@@ -160,7 +160,7 @@ app.controller('baseCtrl', function ($scope, $rootScope, $state, $ionicPopup, $h
         specialPicDisplay: null
     }
 
-    $rootScope.meetCondition = {
+    $rootScope.r_meetCondition = {
         mapLoc: {
             uid: '',
             name: '',
@@ -176,16 +176,16 @@ app.controller('baseCtrl', function ($scope, $rootScope, $state, $ionicPopup, $h
         }
     };
 
-    $rootScope.meetTargetUpdated = {};
+    $rootScope.r_meetTargetUpdated = {};
 
-    $rootScope.targets = [];
+    $rootScope.r_targets = [];
 
-    $rootScope.sex = [
+    $rootScope.r_sex = [
         "男",
         "女"
     ];
 
-    $rootScope.hair = [
+    $rootScope.r_hair = [
         "竖起",
         "躺下",
         "辫子/盘发",
@@ -194,12 +194,12 @@ app.controller('baseCtrl', function ($scope, $rootScope, $state, $ionicPopup, $h
         "戴帽子"
     ];
 
-    $rootScope.glasses = [
+    $rootScope.r_glasses = [
         "带",
         "不带"
     ];
 
-    $rootScope.clothesType = [
+    $rootScope.r_clothesType = [
         "风衣/大衣/夹克",
         "西装/套装",
         "运动外套/卫衣",
@@ -211,7 +211,7 @@ app.controller('baseCtrl', function ($scope, $rootScope, $state, $ionicPopup, $h
         "毛衣/羊毛绒/线衫/针织"
     ];
 
-    $rootScope.clothesColor = [
+    $rootScope.r_clothesColor = [
         "红/紫/粉",
         "黄",
         "蓝/绿",
@@ -221,7 +221,7 @@ app.controller('baseCtrl', function ($scope, $rootScope, $state, $ionicPopup, $h
         "无法分辨主要颜色"
     ];
 
-    $rootScope.clothesStyle = [
+    $rootScope.r_clothesStyle = [
         "纯色",
         "线条/格子/色块",
         "图案(抽象,卡通,画等)"
@@ -232,7 +232,7 @@ app.controller('loginCtrl', function ($scope, $rootScope, $state, PPHttp, $cordo
     $scope.user = {};
 
     $scope.goRegister = function () {
-        $rootScope.newUser = {
+        $rootScope.r_newUser = {
             username: null,
             password: null,
             sex: null,
@@ -257,7 +257,7 @@ app.controller('loginCtrl', function ($scope, $rootScope, $state, PPHttp, $cordo
             },
             //success
             function (data, status) {
-                $rootScope.mainInfo = data.ppData;
+                $rootScope.r_mainInfo = data.ppData;
                 window.localStorage['username'] = user.username;
                 window.localStorage['token'] = data.ppData.token;
                 $state.go("tab.meet");
@@ -268,7 +268,7 @@ app.controller('loginCtrl', function ($scope, $rootScope, $state, PPHttp, $cordo
 });
 
 app.controller('registerCtrl', function($scope, $rootScope, $state, PPHttp, $cordovaToast) {
-    $rootScope.newUser = {
+    $rootScope.r_newUser = {
         username: null,
         password: null,
         sex: null,
@@ -294,7 +294,7 @@ app.controller('registerCtrl', function($scope, $rootScope, $state, PPHttp, $cor
             },
             //success
             function (data, status) {
-                $rootScope.mainInfo = data.ppData;
+                $rootScope.r_mainInfo = data.ppData;
                 window.localStorage['username'] = newUser.username;
                 window.localStorage['token'] = data.ppData.token;
                 $state.go("tab.meet");
@@ -310,9 +310,9 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, PPH
             'getMeets',
             function(data, status)
             {
-                $rootScope.mainInfo.meets = data.ppData;
+                $rootScope.r_mainInfo.meets = data.ppData;
                 //清理$rootScope.meetTargetUpdated
-                $rootScope.meetTargetUpdated = {};
+                $rootScope.r_meetTargetUpdated = {};
             }
         ).finally(
             function() {
@@ -323,13 +323,13 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, PPH
     };
 
     $scope.createMeet = function(){
-        $rootScope.curMeet = null;
-        $http.get($rootScope.serverRoot + "existInfo?username=" + $rootScope.user.username).
+        $rootScope.r_curMeet = null;
+        $http.get($rootScope.serverRoot + "existInfo?username=" + $rootScope.r_user.username).
             success(function(data, status, headers, config) {
                 if (data.result == 'yes')
                 {
-                    $rootScope.searchMode = '发起';
-                    $rootScope.meetCondition = {
+                    $rootScope.r_searchMode = '发起';
+                    $rootScope.r_meetCondition = {
                         meetId: null,
                         mapLoc: {
                             uid: '',
@@ -356,30 +356,30 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, PPH
                 // or server returns response with an error status.
                 if (status == 0)
                 {
-                    $rootScope.showPopup('网络不给力哦!'+ "(" + status + ")");
+                    $rootScope.r_showPopup('网络不给力哦!'+ "(" + status + ")");
                 }
                 else
                 {
                     if (data.result == '请先完善特征信息!')
                     {
-                        $rootScope.showPopup(data.result + "(" + status + ")");
+                        $rootScope.r_showPopup(data.result + "(" + status + ")");
                         $scope.enterInfo();
                     }
                     else
                     {
-                        $rootScope.showPopup(data.result + "(" + status + ")");
+                        $rootScope.r_showPopup(data.result + "(" + status + ")");
                     }
                 }
             });
     }
 
     $scope.enterInfo = function(){
-        $http.get($rootScope.serverRoot + "getInfo?username=" + $rootScope.user.username).
+        $http.get($rootScope.serverRoot + "getInfo?username=" + $rootScope.r_user.username).
             success(function(data, status, headers, config) {
-                $rootScope.myInfo = data.result;
+                $rootScope.r_myInfo = data.result;
                 if ($rootScope.myInfo.specialPic)
                 {
-                    $rootScope.myInfo.specialPicDisplay = $rootScope.serverRoot + "images/normal/" + $rootScope.myInfo.specialPic;
+                    $rootScope.r_myInfo.specialPicDisplay = $rootScope.r_serverRoot + "images/normal/" + $rootScope.r_myInfo.specialPic;
                 }
 
                 $state.go('tab.meet.info');
@@ -403,29 +403,29 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, PPH
     $scope.clickMeet = function(meet){
         if (meet.status=='待确认')
         {
-            ppCopyObj(meet, $rootScope.meetCondition);
-            $rootScope.curMeet = meet;
-            $rootScope.searchMode = '确认';
+            ppCopyObj(meet, $rootScope.r_meetCondition);
+            $rootScope.r_curMeet = meet;
+            $rootScope.r_searchMode = '确认';
 
             if ($rootScope.meetTargetUpdated[meet._id])
             {
                 $http.post(
-                    $rootScope.serverRoot + 'searchTargets',
+                    $rootScope.r_serverRoot + 'searchTargets',
                     {
-                        username: $rootScope.user.username,
-                        meetCondition: $rootScope.meetCondition,
-                        meetId: $rootScope.curMeet ? $rootScope.curMeet._id : null,
-                        searchMode: $rootScope.searchMode,
+                        username: $rootScope.r_user.username,
+                        meetCondition: $rootScope.r_meetCondition,
+                        meetId: $rootScope.r_curMeet ? $rootScope.r_curMeet._id : null,
+                        searchMode: $rootScope.r_searchMode,
                         sendLoc: {
-                            lng: $rootScope.latestLocation.lng,
-                            lat: $rootScope.latestLocation.lat
+                            lng: $rootScope.r_latestLocation.lng,
+                            lat: $rootScope.r_latestLocation.lat
                         }
                     }
                 )
                     .success(function(data, status, headers, config) {
                         // this callback will be called asynchronously
                         // when the response is available
-                        $rootScope.targets = data.result;
+                        $rootScope.r_targets = data.result;
                         $state.go('tab.meet.condition.specialPic');
                     }).
                     error($rootScope.ppError);
@@ -437,10 +437,10 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, PPH
         }
         else if (meet.status == '待回复')
         {
-            if (meet.target.username == $rootScope.user.username)
+            if (meet.target.username == $rootScope.r_user.username)
             {
-                $rootScope.searchMode = '回复';
-                $rootScope.meetCondition = {
+                $rootScope.r_searchMode = '回复';
+                $rootScope.r_meetCondition = {
                     mapLoc: meet.mapLoc,
                     specialInfo: {
                         sex : '',
@@ -451,12 +451,12 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, PPH
                         hair : ''
                     }
                 };
-                $rootScope.curMeet = meet;
+                $rootScope.r_curMeet = meet;
                 $state.go('tab.meet.condition');
             }
-            else if (meet.creater.username == $rootScope.user.username)
+            else if (meet.creater.username == $rootScope.r_user.username)
             {
-                $rootScope.curMeet = meet;
+                $rootScope.r_curMeet = meet;
                 $scope.modal.show();
             }
         }
