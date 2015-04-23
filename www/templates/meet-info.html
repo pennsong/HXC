@@ -1,0 +1,73 @@
+<ion-view view-title="我的特征">
+    <ion-nav-bar class="bar-positive">
+        <ion-nav-back-button ng-click="myGoBack()">
+        </ion-nav-back-button>
+    </ion-nav-bar>
+
+    <ion-content>
+
+        <div class="list card">
+            <a href="#" class="item item-icon-left">
+                <i class="icon ion-transgender"></i>
+                性别
+                <span class="item-note">
+                  {{myInfo.specialInfo.sex}}
+                </span>
+            </a>
+
+            <a href="#" class="item item-icon-left" ng-click="clickInfoItem('发型')">
+                <i class="icon ion-ios-person"></i>
+                发型
+                <span class="item-note">
+                  {{myInfo.specialInfo.hair}}
+                </span>
+            </a>
+
+            <a href="#" class="item item-icon-left" ng-click="clickInfoItem('眼镜')">
+                <i class="icon ion-ios-glasses"></i>
+                眼镜
+                <span class="item-note">
+                  {{myInfo.specialInfo.glasses}}
+                </span>
+            </a>
+
+            <a href="#" class="item item-icon-left" ng-click="clickInfoItem('衣服类型')">
+                <i class="icon ion-tshirt"></i>
+                衣服类型
+                <span class="item-note">
+                  {{myInfo.specialInfo.clothesType}}
+                </span>
+            </a>
+
+            <a href="#" class="item item-icon-left" ng-click="clickInfoItem('衣服颜色')">
+                <i class="icon ion-android-color-palette"></i>
+                衣服颜色
+                <span class="item-note">
+                  {{myInfo.specialInfo.clothesColor}}
+                </span>
+            </a>
+
+            <a href="#" class="item item-icon-left" ng-click="clickInfoItem('衣服花纹')">
+                <i class="icon ion-ios-medical"></i>
+                衣服花纹
+                <span class="item-note">
+                  {{myInfo.specialInfo.clothesStyle}}
+                </span>
+            </a>
+        </div>
+        <div class="card">
+            <div class="item item-text-wrap">
+                拍摄特征图片帮助...
+            </div>
+            <div class="text-center" style="padding-top:10px">
+                <img class="middleImg" ng-if="myInfo.specialPicDisplay" ng-src="{{myInfo.specialPicDisplay}}">
+                <img class="middleImg" ng-if="!myInfo.specialPicDisplay" ng-src="img/200x200.gif">
+            </div>
+            <div class="padding">
+                <button class="button button-block button-positive" ng-click="takePhoto()">
+                    拍摄
+                </button>
+            </div>
+        </div>
+    </ion-content>
+</ion-view>

@@ -1,0 +1,27 @@
+<ion-view view-title="登录">
+    <ion-header-bar align-title="center" class="bar-positive">
+        <h1 class="title">登录</h1>
+    </ion-header-bar>
+    <ion-content>
+        <div class="list">
+            <label class="item item-input item-floating-label">
+                <span class="input-label">用户名</span>
+                <input type="text" placeholder="用户名" ng-model="user.username">
+            </label>
+            <label class="item item-input item-floating-label">
+                <span class="input-label">密码</span>
+                <input type="text" placeholder="密码" ng-model="user.password">
+            </label>
+        </div>
+        <div class="padding">
+            <button class="button button-block button-positive" ng-click="login(user)">
+                确定
+            </button>
+        </div>
+        <div class="padding">
+            <a class="button button-block button-positive" ng-click="goRegister()">
+                注册
+            </a>
+        </div>
+    </ion-content>
+</ion-view>

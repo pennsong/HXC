@@ -1,0 +1,18 @@
+<ion-modal-view>
+    <ion-header-bar>
+        <h1 class="title">特征图片(大图)</h1>
+        <div class="button button-clear" ng-click="modal.hide()"><span class="icon ion-close"></span></div>
+    </ion-header-bar>
+    <ion-content padding="true">
+        <div class="list card" style="box-shadow: 0 0px 0px ">
+
+            <div class="item item-image" ng-if="targetSpecialPic">
+                <img ng-src="{{imagePath + 'normal/' + targetSpecialPic}}">
+            </div>
+            <button class="button button-block button-balanced icon ion-heart" ng-click="yes(targetUsername)">
+                就是TA
+            </button>
+        </div>
+
+    </ion-content>
+</ion-modal-view>

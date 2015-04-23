@@ -1,0 +1,25 @@
+<ion-modal-view>
+    <ion-header-bar>
+        <h1 class="title">{{curOptionName}}</h1>
+        <div class="button button-clear" ng-click="modal.hide()"><span class="icon ion-close"></span></div>
+    </ion-header-bar>
+    <ion-content>
+        <div class="list list-inset" ng-if="curOptionName == '地点'">
+            <label class="item item-input">
+                <i class="icon ion-search placeholder-icon"></i>
+                <input type="text" placeholder="请先输入关键字..." ng-model="keyword" ng-change="changeKeyword(keyword)">
+            </label>
+        </div>
+        <div class="list">
+            <label class="item item-radio" ng-repeat="item in curOptions" ng-click="clickItem(item)">
+                <div class="item-content" ng-if="item.name">
+                    <h2>{{item.name}}</h2>
+                    <p>{{item.address}}</p>
+                </div>
+                <div class="item-content" ng-if="!item.name">
+                    <h2>{{item}}</h2>
+                </div>
+            </label>
+        </div>
+    </ion-content>
+</ion-modal-view>

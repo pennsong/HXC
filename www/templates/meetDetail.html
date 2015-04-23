@@ -1,0 +1,74 @@
+<ion-modal-view>
+    <ion-header-bar>
+        <h1 class="title">邂逅详情</h1>
+        <div class="button button-clear" ng-click="modal.hide()"><span class="icon ion-close"></span></div>
+    </ion-header-bar>
+    <ion-content padding="true">
+        <div class="list">
+
+            <a class="item item-icon-left" href="#">
+                <i class="icon ion-location"></i>
+                地点
+                <span class="item-note">
+                    <h2>{{curMeet.mapLoc.name}}</h2>
+                    <p>{{curMeet.mapLoc.address}}</p>
+                </span>
+            </a>
+        </div>
+        <div class="list" style="text-align: center">
+            <img class="middleImg" ng-src="{{curMeet.logo}}">
+        </div>
+        <div class="list">
+            <a class="item item-icon-left" href="#">
+                <i class="icon ion-transgender"></i>
+                性别
+                 <span class="item-note">
+                    {{curMeet.specialInfo.sex}}
+                </span>
+            </a>
+
+            <a class="item item-icon-left" href="#">
+                <i class="icon ion-mic-a"></i>
+                发型
+                <span class="item-note">
+                  {{curMeet.specialInfo.hair}}
+                </span>
+            </a>
+
+            <a class="item item-icon-left" href="#">
+                <i class="icon ion-ios-glasses"></i>
+                眼镜
+                 <span class="item-note">
+                  {{curMeet.specialInfo.glasses}}
+                </span>
+            </a>
+
+            <a class="item item-icon-left" href="#">
+                <i class="icon ion-tshirt"></i>
+                衣服类型
+                 <span class="item-note">
+                  {{curMeet.specialInfo.clothesType}}
+                </span>
+            </a>
+
+            <a class="item item-icon-left" href="#">
+                <i class="icon ion-android-color-palette"></i>
+                衣服颜色
+                 <span class="item-note">
+                  {{curMeet.specialInfo.clothesColor}}
+                </span>
+            </a>
+
+            <a class="item item-icon-left" href="#">
+                <i class="icon ion-ios-medical"></i>
+                衣服花纹
+                 <span class="item-note">
+                  {{curMeet.specialInfo.clothesStyle}}
+                </span>
+            </a>
+
+        </div>
+
+
+    </ion-content>
+</ion-modal-view>

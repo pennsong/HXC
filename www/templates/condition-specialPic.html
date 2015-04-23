@@ -1,0 +1,21 @@
+<ion-view view-title="特征图片">
+    <ion-content padding="true">
+        <div style="text-align:center" ng-repeat="item in targets">
+            <div class="row" ng-if="$even">
+                <div class="col">
+                    <a href="#" ng-click="getBigPic(targets[$index].username, targets[$index].specialPic)">
+                        <img style="width: 120px" ng-src="{{imagePath + 'normal/' + targets[$index].specialPic}}">
+                    </a>
+                </div>
+                <div class="col" ng-if="targets[$index + 1]">
+                    <a href="#" ng-click="getBigPic(targets[$index + 1].username, targets[$index + 1].specialPic)">
+                        <img style="width: 120px"  ng-src="{{imagePath + 'normal/' + targets[$index + 1].specialPic}}">
+                    </a>
+                </div>
+            </div>
+        </div>
+        <button class="button button-block button-stable icon ion-heart-broken" ng-click="no()">
+            不在其中
+        </button>
+    </ion-content>
+</ion-view>
