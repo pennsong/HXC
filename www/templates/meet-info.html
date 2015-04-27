@@ -11,7 +11,7 @@
                 <i class="icon ion-transgender"></i>
                 性别
                 <span class="item-note">
-                  {{myInfo.specialInfo.sex}}
+                  {{r_mainInfo.user.specialInfo.sex}}
                 </span>
             </a>
 
@@ -19,7 +19,7 @@
                 <i class="icon ion-ios-person"></i>
                 发型
                 <span class="item-note">
-                  {{myInfo.specialInfo.hair}}
+                  {{r_mainInfo.user.specialInfo.hair}}
                 </span>
             </a>
 
@@ -27,7 +27,7 @@
                 <i class="icon ion-ios-glasses"></i>
                 眼镜
                 <span class="item-note">
-                  {{myInfo.specialInfo.glasses}}
+                  {{r_mainInfo.user.specialInfo.glasses}}
                 </span>
             </a>
 
@@ -35,7 +35,7 @@
                 <i class="icon ion-tshirt"></i>
                 衣服类型
                 <span class="item-note">
-                  {{myInfo.specialInfo.clothesType}}
+                  {{r_mainInfo.user.specialInfo.clothesType}}
                 </span>
             </a>
 
@@ -43,7 +43,7 @@
                 <i class="icon ion-android-color-palette"></i>
                 衣服颜色
                 <span class="item-note">
-                  {{myInfo.specialInfo.clothesColor}}
+                  {{r_mainInfo.user.specialInfo.clothesColor}}
                 </span>
             </a>
 
@@ -51,7 +51,7 @@
                 <i class="icon ion-ios-medical"></i>
                 衣服花纹
                 <span class="item-note">
-                  {{myInfo.specialInfo.clothesStyle}}
+                  {{r_mainInfo.user.specialInfo.clothesStyle}}
                 </span>
             </a>
         </div>
@@ -60,8 +60,8 @@
                 拍摄特征图片帮助...
             </div>
             <div class="text-center" style="padding-top:10px">
-                <img class="middleImg" ng-if="myInfo.specialPicDisplay" ng-src="{{myInfo.specialPicDisplay}}">
-                <img class="middleImg" ng-if="!myInfo.specialPicDisplay" ng-src="img/200x200.gif">
+                <img class="middleImg" ng-if="r_mainInfo.user.specialPicDisplay" ng-src="{{r_serverRoot + 'images/normal/' + r_mainInfo.user.specialPicDisplay}}">
+                <img class="middleImg" ng-if="!r_mainInfo.user.specialPicDisplay" ng-src="img/200x200.gif">
             </div>
             <div class="padding">
                 <button class="button button-block button-positive" ng-click="takePhoto()">

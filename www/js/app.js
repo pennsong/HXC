@@ -1,3 +1,12 @@
+function ppCopyObj(source, destination) {
+    for (var property in destination) {
+        if (typeof destination[property] === "object") {
+            ppCopyObj(source[property], destination[property]);
+        } else {
+            destination[property] = source[property];
+        }
+    }
+};
 // Ionic Starter App
 
 // angular.module is a global place for creating, registering and retrieving Angular modules
@@ -5,7 +14,7 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.services' is found in services.js
 // 'starter.controllers' is found in controllers.js
-var app = angular.module('starter', ['ionic', 'ngCordova'])
+var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
 
     .run(function ($ionicPlatform, $cordovaDevice, $cordovaKeyboard) {
         $ionicPlatform.ready(function () {
@@ -115,9 +124,7 @@ var app = angular.module('starter', ['ionic', 'ngCordova'])
     });
 
 app.controller('baseCtrl', function ($scope, $rootScope, $state, $ionicPopup, $http) {
-    $rootScope.r_token = null;
-
-    $rootScope.r_username = window.localStorage['username'] || '';
+    $rootScope.r_infoNeedUpdateTime = 0;
 
     $rootScope.r_lastLocation = {
         lng: null,
@@ -133,7 +140,7 @@ app.controller('baseCtrl', function ($scope, $rootScope, $state, $ionicPopup, $h
 
     $rootScope.r_mainInfo = null;
 
-    $rootScope.r_serverRoot = "http://192.168.1.20:3000/";
+    $rootScope.r_serverRoot = "http://192.168.1.15:3000/";
     $rootScope.r_imagePath = $rootScope.r_serverRoot + 'images/';
     $rootScope.r_sysImagePath = $rootScope.r_serverRoot + 'images/system/';
 
@@ -249,7 +256,9 @@ app.controller('loginCtrl', function ($scope, $rootScope, $state, PPHttp, $cordo
             return;
         }
 
-        PPHttp.do(
+        PPHttp.do
+        (
+            'p',
             'login', {
                 username: user.username,
                 password: user.password,
@@ -258,7 +267,9 @@ app.controller('loginCtrl', function ($scope, $rootScope, $state, PPHttp, $cordo
             //success
             function (data, status) {
                 $rootScope.r_mainInfo = data.ppData;
-                window.localStorage['username'] = user.username;
+                console.log($rootScope.r_mainInfo);
+                window.localStorage['username'] = data.ppData.user.username;
+                window.localStorage['nickname'] = data.ppData.user.nickname;
                 window.localStorage['token'] = data.ppData.token;
                 $state.go("tab.meet");
             }
@@ -285,6 +296,7 @@ app.controller('registerCtrl', function($scope, $rootScope, $state, PPHttp, $cor
         }
 
         PPHttp.do(
+            'p',
             'register', {
                 username: newUser.username,
                 password: newUser.password,
@@ -303,90 +315,7 @@ app.controller('registerCtrl', function($scope, $rootScope, $state, PPHttp, $cor
     }
 });
 
-app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, PPHttp) {
-    $scope.doRefresh = function() {
-        PPHttp.do(
-            'p',
-            'getMeets',
-            function(data, status)
-            {
-                $rootScope.r_mainInfo.meets = data.ppData;
-                //清理$rootScope.meetTargetUpdated
-                $rootScope.r_meetTargetUpdated = {};
-            }
-        ).finally(
-            function() {
-                $scope.$broadcast('scroll.refreshComplete');
-                //$scope.$apply();
-            }
-        );
-    };
-
-    $scope.createMeet = function(){
-        $rootScope.r_curMeet = null;
-        $http.get($rootScope.serverRoot + "existInfo?username=" + $rootScope.r_user.username).
-            success(function(data, status, headers, config) {
-                if (data.result == 'yes')
-                {
-                    $rootScope.r_searchMode = '发起';
-                    $rootScope.r_meetCondition = {
-                        meetId: null,
-                        mapLoc: {
-                            uid: '',
-                            name: '',
-                            address: ''
-                        },
-                        specialInfo: {
-                            sex : '',
-                            clothesColor : '',
-                            clothesStyle : '',
-                            clothesType : '',
-                            glasses : '',
-                            hair : ''
-                        }
-                    };
-                    $state.go('tab.meet.condition');
-                }
-                else
-                {
-                }
-            }).
-            error(function(data, status, headers, config) {
-                // called asynchronously if an error occurs
-                // or server returns response with an error status.
-                if (status == 0)
-                {
-                    $rootScope.r_showPopup('网络不给力哦!'+ "(" + status + ")");
-                }
-                else
-                {
-                    if (data.result == '请先完善特征信息!')
-                    {
-                        $rootScope.r_showPopup(data.result + "(" + status + ")");
-                        $scope.enterInfo();
-                    }
-                    else
-                    {
-                        $rootScope.r_showPopup(data.result + "(" + status + ")");
-                    }
-                }
-            });
-    }
-
-    $scope.enterInfo = function(){
-        $http.get($rootScope.serverRoot + "getInfo?username=" + $rootScope.r_user.username).
-            success(function(data, status, headers, config) {
-                $rootScope.r_myInfo = data.result;
-                if ($rootScope.myInfo.specialPic)
-                {
-                    $rootScope.r_myInfo.specialPicDisplay = $rootScope.r_serverRoot + "images/normal/" + $rootScope.r_myInfo.specialPic;
-                }
-
-                $state.go('tab.meet.info');
-            }).
-            error($rootScope.ppError);
-    }
-
+app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, $ionicLoading, PPHttp) {
     $ionicModal.fromTemplateUrl(
         'templates/meetDetail.html',
         function($ionicModal) {
@@ -407,28 +336,21 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, PPH
             $rootScope.r_curMeet = meet;
             $rootScope.r_searchMode = '确认';
 
-            if ($rootScope.meetTargetUpdated[meet._id])
+            if (!($rootScope.r_meetTargetUpdated[meet._id]))
+            //if ($rootScope.r_meetTargetUpdated[meet._id])
             {
-                $http.post(
-                    $rootScope.r_serverRoot + 'searchTargets',
-                    {
-                        username: $rootScope.r_user.username,
-                        meetCondition: $rootScope.r_meetCondition,
-                        meetId: $rootScope.r_curMeet ? $rootScope.r_curMeet._id : null,
-                        searchMode: $rootScope.r_searchMode,
-                        sendLoc: {
-                            lng: $rootScope.r_latestLocation.lng,
-                            lat: $rootScope.r_latestLocation.lat
-                        }
-                    }
-                )
-                    .success(function(data, status, headers, config) {
-                        // this callback will be called asynchronously
-                        // when the response is available
-                        $rootScope.r_targets = data.result;
+                PPHttp.do(
+                    'p',
+                    'confirmMeetSearchTarget', {
+                        token: $rootScope.r_mainInfo.token,
+                        meetId: meet._id
+                    },
+                    //success
+                    function (data, status) {
+                        $rootScope.r_targets = data.ppData;
                         $state.go('tab.meet.condition.specialPic');
-                    }).
-                    error($rootScope.ppError);
+                    }
+                );
             }
             else
             {
@@ -437,31 +359,330 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, PPH
         }
         else if (meet.status == '待回复')
         {
-            if (meet.target.username == $rootScope.r_user.username)
+            if (meet.target.username == $rootScope.r_mainInfo.user.username)
             {
                 $rootScope.r_searchMode = '回复';
                 $rootScope.r_meetCondition = {
                     mapLoc: meet.mapLoc,
                     specialInfo: {
-                        sex : '',
-                        clothesColor : '',
-                        clothesStyle : '',
-                        clothesType : '',
-                        glasses : '',
-                        hair : ''
+                        sex : null,
+                        clothesColor : null,
+                        clothesStyle : null,
+                        clothesType : null,
+                        glasses : null,
+                        hair : null
                     }
                 };
                 $rootScope.r_curMeet = meet;
                 $state.go('tab.meet.condition');
             }
-            else if (meet.creater.username == $rootScope.r_user.username)
+            else if (meet.creater.username == $rootScope.r_mainInfo.user.username)
             {
                 $rootScope.r_curMeet = meet;
+                console.log(meet);
                 $scope.modal.show();
             }
         }
     }
+
+    $scope.doRefresh = function() {
+        PPHttp.do(
+            'p',
+            'getMeets',
+            {
+                token: $rootScope.r_mainInfo.token
+            },
+            function(data, status)
+            {
+                $rootScope.r_mainInfo.meets = data.ppData;
+                //清理$rootScope.meetTargetUpdated
+                $rootScope.r_meetTargetUpdated = {};
+            }
+        ).finally(
+            function() {
+                $scope.$broadcast('scroll.refreshComplete');
+                //$scope.$apply();
+            }
+        );
+    };
+
+    $scope.createMeet = function() {
+        $rootScope.r_curMeet = null;
+        $ionicLoading.show({
+            template: 'Loading...'
+        });
+        PPHttp.do(
+            'p',
+            'sendMeetCheck',
+            {
+                token: $rootScope.r_mainInfo.token
+            },
+            function (data, status) {
+                if (data.ppResult == 'ok') {
+                    $rootScope.r_searchMode = '发起';
+                    $rootScope.r_meetCondition = {
+                        meetId: null,
+                        mapLoc: {
+                            uid: null,
+                            name: null,
+                            address: null
+                        },
+                        specialInfo: {
+                            sex: null,
+                            clothesColor: null,
+                            clothesStyle: null,
+                            clothesType: null,
+                            glasses: null,
+                            hair: null
+                        }
+                    };
+                    $state.go('tab.meet.condition');
+                }
+            }
+        ).finally(
+            function(){
+                $ionicLoading.hide();
+            }
+        );
+    };
+
+    $scope.enterInfo = function(){
+        if (!($rootScope.r_mainInfo.user.specialInfoTime
+            &&
+            moment().startOf('day').add(0, 'hours').isBefore($rootScope.r_mainInfo.user.specialInfoTime)
+            )){
+            console.log($rootScope.r_mainInfo.user.specialInfoTime);
+            console.log(moment().startOf('day').add(4, 'hours').isBefore($rootScope.r_mainInfo.user.specialInfoTime));
+
+            $rootScope.r_mainInfo.user.specialInfo.hair = null;
+            $rootScope.r_mainInfo.user.specialInfo.glasses = null;
+            $rootScope.r_mainInfo.user.specialInfo.clothesType = null;
+            $rootScope.r_mainInfo.user.specialInfo.clothesColor = null;
+            $rootScope.r_mainInfo.user.specialInfo.clothesStyle = null;
+            $rootScope.r_mainInfo.user.specialPic = null;
+        }
+        console.log($rootScope.r_mainInfo);
+        $state.go('tab.meet.info');
+    };
 });
+
+app.controller('meetConditionCtrl', function($scope, $rootScope, $state, $ionicModal, $timeout) {
+    $scope.bLng = null;
+    $scope.bLat = null;
+});
+
+app.controller('meetInfoCtrl', function($scope, $rootScope, $state, $ionicModal, $cordovaCamera, PPHttp, $cordovaToast, $cordovaFileTransfer, $ionicLoading) {
+    $scope.myGoBack = function() {
+        if (!(
+            $rootScope.r_mainInfo.user.specialInfo.clothesColor
+            && $rootScope.r_mainInfo.user.specialInfo.clothesStyle
+            && $rootScope.r_mainInfo.user.specialInfo.clothesType
+            && $rootScope.r_mainInfo.user.specialInfo.glasses
+            && $rootScope.r_mainInfo.user.specialInfo.hair
+            && $rootScope.r_mainInfo.user.specialPic
+            )){
+            console.log('请填写完整!');
+            $cordovaToast.showShortCenter('请填写完整!');
+            return;
+        }
+        //update info
+
+        $ionicLoading.show({
+            template: '上传中...'
+        });
+        PPHttp.do(
+            'p',
+            'updateSpecialInfo',
+            {
+                token: $rootScope.r_mainInfo.token,
+                hair: $rootScope.r_mainInfo.user.specialInfo.hair,
+                glasses: $rootScope.r_mainInfo.user.specialInfo.glasses,
+                clothesType: $rootScope.r_mainInfo.user.specialInfo.clothesType,
+                clothesColor: $rootScope.r_mainInfo.user.specialInfo.clothesColor,
+                clothesStyle: $rootScope.r_mainInfo.user.specialInfo.clothesStyle,
+                specialPic: $rootScope.r_mainInfo.user.specialPic
+            },
+            function (data, status) {
+                if (data.ppResult == 'ok') {
+                    $state.go('tab.meet');
+                }
+            }
+        ).finally(
+            function(){
+                $ionicLoading.hide();
+            }
+        );
+    };
+
+    $ionicModal.fromTemplateUrl(
+        'templates/option.html',
+        function($ionicModal) {
+            $scope.modal = $ionicModal;
+        },
+        {
+            // Use our scope for the scope of the modal to keep it simple
+            scope: $scope,
+            // The animation we want to use for the modal entrance
+            animation: 'slide-in-up'
+        }
+    );
+
+    $scope.clickInfoItem = function(item){
+        switch(item) {
+            case "发型":
+                $rootScope.r_curOptions = $rootScope.r_hair;
+                break;
+            case "眼镜":
+                $rootScope.r_curOptions = $rootScope.r_glasses;
+                break;
+            case "衣服类型":
+                $rootScope.r_curOptions = $rootScope.r_clothesType;
+                break;
+            case "衣服颜色":
+                $rootScope.r_curOptions = $rootScope.r_clothesColor;
+                break;
+            case "衣服花纹":
+                $rootScope.r_curOptions = $rootScope.r_clothesStyle;
+                break;
+            default:
+        }
+        $rootScope.r_curOptionName = item;
+        $scope.modal.show();
+    };
+
+    $scope.clickItem = function(item){
+        switch($rootScope.r_curOptionName) {
+            case "发型":
+                $rootScope.r_mainInfo.user.specialInfo.hair = item;
+                break;
+            case "眼镜":
+                $rootScope.r_mainInfo.user.specialInfo.glasses = item;
+                break;
+            case "衣服类型":
+                $rootScope.r_mainInfo.user.specialInfo.clothesType = item;
+                break;
+            case "衣服颜色":
+                $rootScope.r_mainInfo.user.specialInfo.clothesColor = item;
+                break;
+            case "衣服花纹":
+                $rootScope.r_mainInfo.user.specialInfo.clothesStyle = item;
+                break;
+            default:
+
+        }
+        $scope.modal.hide();
+    };
+
+    $scope.takePhoto = function(){
+        try{
+            var options = {
+                quality: 30,
+                destinationType: Camera.DestinationType.FILE_URI,
+                sourceType: Camera.PictureSourceType.CAMERA,
+                allowEdit: true,
+                encodingType: Camera.EncodingType.JPEG,
+                targetWidth: 200,
+                targetHeight: 200,
+                popoverOptions: CameraPopoverOptions,
+                saveToPhotoAlbum: true
+            };
+
+            $cordovaCamera.getPicture(options).then(function(fileURL) {
+                //$rootScope.r_mainInfo.user.specialPicDisplay = fileURL;
+
+                var params = new Object();
+                params.token = $rootScope.r_mainInfo.token;
+
+                var options = {
+                    fileKey: "specialPic",
+                    fileName: "image.png",
+                    chunkedMode: false,
+                    mimeType: "image/png",
+                    params: params
+                };
+
+                $cordovaFileTransfer.upload($rootScope.r_serverRoot + 'users/uploadSpecialPic', fileURL, options, true)
+                    .then(function(result) {
+                        $rootScope.r_mainInfo.user.specialPic = (JSON.parse(result.response))["ppResult"];
+                        $rootScope.r_mainInfo.user.specialPicDisplay = $rootScope.r_mainInfo.user.specialPic;
+                        console.log($rootScope.r_mainInfo.user.specialPic);
+                    }, function(err) {
+                        console.log(err);
+                        $cordovaToast.showShortCenter(err);
+                    }, function (progress) {
+                        // constant progress updates
+                    });
+            }, function(err) {
+                // error
+                console.log(err);
+                $cordovaToast.showShortCenter(err);
+            });
+        }
+        catch (err) {
+            console.log(err);
+            $cordovaToast.showShortCenter(err);
+        }
+    }
+
+});
+
+app.controller('profileCtrl', function($scope, $rootScope, $state, $ionicHistory, $timeout, $ionicLoading, $http, $cordovaToast) {
+
+    $scope.getCurMapPosition = function()
+    {
+        //console.log($rootScope.r_lastLocation);
+        $http.jsonp("http://api.map.baidu.com/geoconv/v1/?callback=JSON_CALLBACK&ak=MgBALVVeCd8THVBi6gPdvsvG&coords=" + $rootScope.r_lastLocation.lng + "," + $rootScope.r_lastLocation.lat).
+            success(function(data, status, headers, config) {
+                //转换为百度坐标
+                if (data.status == 0)
+                {
+                $scope.bLng = data.result[0].x;
+                $scope.bLat = data.result[0].y;
+                $scope.mapUpdateTime = new Date();
+                }
+                else
+                {
+                    console.log(data.message);
+                    $cordovaToast.showShortCenter(data.message);
+                }
+            }).
+            error(function(err){
+                console.log(err);
+                $cordovaToast.showShortCenter(err);
+            });
+    }
+
+    $scope.mapLocs = [];
+
+    $scope.logout = function(){
+        $ionicHistory.nextViewOptions({
+            disableAnimate: true,
+            disableBack: true,
+            historyRoot: true
+        });
+
+        $ionicLoading.show({
+            template: '退出中...'
+        });
+
+        $state.go('login');
+        $timeout(function() {
+            window.location.reload();
+            $ionicLoading.hide();
+        }, 300);
+
+    }
+});
+
+app.controller('conditionSpecialCtrl', function($scope, $rootScope, $state, $ionicModal, $ionicHistory, PPHttp) {
+});
+
+app.filter("objectIDtoDate", function () {
+    return function (objectID) {
+        moment.locale('zh-cn');
+        return moment(new Date(parseInt((""+objectID).substr(0,8), 16)*1000));
+    };
+})
 
 app.factory('PPHttp', function ($rootScope, $http, $cordovaToast) {
     var handleSuccess = function (data, status) {
@@ -478,6 +699,11 @@ app.factory('PPHttp', function ($rootScope, $http, $cordovaToast) {
             }, function (error) {
                 // error
             });
+
+        if (data.ppMsg == "认证错误!")
+        {
+            //todo logout
+        }
     };
 
     return {
@@ -485,20 +711,19 @@ app.factory('PPHttp', function ($rootScope, $http, $cordovaToast) {
             var s = success || handleSuccess;
             var e = err || handleErr;
             var p = paramObj || {};
-
             switch(methord) {
                 case 'g':
-                    return $http.get($rootScope.serverRoot + "users/" + path, p)
+                    return $http.get($rootScope.r_serverRoot + "users/" + path, p)
                         .success(s)
                         .error(e);
                     break;
                 case 'p':
-                    return $http.post($rootScope.serverRoot + "users/" + path, p)
+                    return $http.post($rootScope.r_serverRoot + "users/" + path, p)
                         .success(s)
                         .error(e);
                     break;
                 default:
-                    return $http.post($rootScope.serverRoot + "users/" + path, p)
+                    return $http.post($rootScope.r_serverRoot + "users/" + path, p)
                         .success(s)
                         .error(e);
             }
