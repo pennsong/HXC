@@ -111,7 +111,7 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
                 notificationTitle: 'Background tracking', // <-- android only, customize the title of the notification
                 notificationText: 'ENABLED', // <-- android only, customize the text of the notification
                 activityType: 'AutomotiveNavigation',
-                debug: true, // <-- enable this hear sounds for background-geolocation life-cycle.
+                debug: false, // <-- enable this hear sounds for background-geolocation life-cycle.
                 stopOnTerminate: false // <-- enable this to clear background location settings when the app terminates
             });
         });
@@ -542,7 +542,7 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, $io
     $scope.enterInfo = function(){
         if (!($rootScope.r_mainInfo.user.specialInfoTime
             &&
-            moment().startOf('day').add(0, 'hours').isBefore($rootScope.r_mainInfo.user.specialInfoTime)
+            moment().startOf('day').add(-8, 'hours').isBefore($rootScope.r_mainInfo.user.specialInfoTime)
             )){
             //console.log($rootScope.r_mainInfo.user.specialInfoTime);
             //console.log(moment().startOf('day').add(4, 'hours').isBefore($rootScope.r_mainInfo.user.specialInfoTime));
@@ -709,6 +709,8 @@ app.controller('meetInfoCtrl', function($scope, $rootScope, $state, $ionicModal,
                 // error
                 console.log(err);
                 $cordovaToast.showShortCenter(err);
+                $rootScope.r_mainInfo.user.specialPic = "tbd.jpeg";
+                $rootScope.r_mainInfo.user.specialPicDisplay = $rootScope.r_mainInfo.user.specialPic;
             });
         }
         catch (err) {
@@ -772,6 +774,8 @@ app.controller('profileCtrl', function($scope, $rootScope, $state, $ionicHistory
         $timeout(function() {
             window.location.reload();
             $ionicLoading.hide();
+            //暂停位置追踪
+            $rootScope.r_bgGeo.stop();
         }, 300);
 
     }
