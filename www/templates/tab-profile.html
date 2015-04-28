@@ -9,10 +9,12 @@
         <button class="button button-full button-positive" ng-click="getCurMapPosition()">
             查看最新位置信息
         </button>
-        <div class="item item-image" ng-if="mapUpdateTime">
+        <div class="item item-image" ng-if="lastLocationTime">
             <img src="http://api.map.baidu.com/staticimage?center={{bLng}},{{bLat}}&width=400&height=300&zoom=17&markers={{bLng}},{{bLat}}">
         </div>
-        <p>更新时间: <span am-time-ago="{{mapUpdateTime}}"></span></p>
+        <p>更新时间: <span am-time-ago="{{lastLocationTime}}"></span>{{lastLocationTime|date:'yyyy-MM-dd HH:mm:ss Z'}}</p>
         </p> 在线状态: {{online}} </p>
+        <p>bLng:{{bLng}}</p>
+        <p>bLat:{{bLat}}</p>
     </ion-content>
 </ion-view>

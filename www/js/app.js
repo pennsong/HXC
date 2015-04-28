@@ -16,10 +16,12 @@ function ppCopyObj(source, destination) {
 // 'starter.controllers' is found in controllers.js
 var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
 
-    .run(function ($ionicPlatform, $cordovaDevice, $cordovaKeyboard) {
+    .run(function ($ionicPlatform, $cordovaDevice, $cordovaKeyboard, $cordovaToast, $rootScope, PPHttp) {
         $ionicPlatform.ready(function () {
             // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
             // for form inputs)
+            $rootScope.r_serverRoot = "http://192.168.1.15:3000/";
+            //$rootScope.r_serverRoot = "http://218.79.184.235:3000/";
 
             $cordovaKeyboard.hideAccessoryBar(true)
 
@@ -27,6 +29,91 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
                 // org.apache.cordova.statusbar required
                 StatusBar.styleLightContent();
             }
+
+            window.navigator.geolocation.getCurrentPosition(function(location) {
+                //console.log('Location from Phonegap');
+            });
+
+            $rootScope.r_bgGeo = window.plugins.backgroundGeoLocation;
+
+            var yourAjaxCallback = function(location) {
+                //alert('1[js] BackgroundGeoLocation callback:  ' + location.latitude + ',' + location.longitude);
+                ////
+                // IMPORTANT:  You must execute the #finish method here to inform the native plugin that you're finished,
+                //  and the background-task may be completed.  You must do this regardless if your HTTP request is successful or not.
+                // IF YOU DON'T, ios will CRASH YOUR APP for spending too much time in the background.
+                //
+                //
+                //console.log('===============');
+                //console.log(location);
+                PPHttp.do
+                (
+                    'p',
+                    'updateLocation', {
+                        lng: location.longitude,
+                        lat: location.latitude,
+                        token: $rootScope.r_mainInfo.token
+                    },
+                    //success
+                    function (data, status) {
+                        $rootScope.r_lastLocation = data.ppData;
+                        $cordovaToast.showShortCenter($rootScope.r_lastLocation.lng + "," + $rootScope.r_lastLocation.lat);
+                        //console.log(data.ppData);
+                    }
+                ).finally(
+                    function() {
+                        $rootScope.r_bgGeo.finish();
+                    }
+                );
+            };
+
+
+            var callbackFn = function(location) {
+                //console.log('[js] BackgroundGeoLocation callback:  ' + location.latitude + ',' + location.longitude);
+                //$rootScope.r_lastLocation = {
+                //    lng: location.longitude,
+                //    lat: location.latitude
+                //};
+
+                //console.log(location);
+                //$cordovaToast.showShortCenter('a:' + '[js] BackgroundGeoLocation callback:  ' + location.latitude + ',' + location.longitude);
+                // Do your HTTP request here to POST location to your server.
+                //
+                //
+                //alert('2[js] BackgroundGeoLocation callback:  ' + location.latitude + ',' + location.longitude);
+                $cordovaToast.showShortCenter('callback');
+                //console.log('---------------------------');
+                //console.log(location);
+                yourAjaxCallback.call(this, location);
+            };
+
+            var failureFn = function(error) {
+                $cordovaToast.showShortCenter(error);
+                //console.log(error);
+                //$cordovaToast.showShortCenter('e:' + error);
+                //alert('BackgroundGeoLocation error');
+            }
+
+            $rootScope.r_bgGeo.configure(callbackFn, failureFn, {
+                //url: $rootScope.r_serverRoot + "users/updateLocation", // <-- Android ONLY:  your server url to send locations to
+                //url: "http://192.168.1.15:3000/users/updateLocation",
+                //params: {
+                //    //auth_token: 'user_secret_auth_token',    //  <-- Android ONLY:  HTTP POST params sent to your server when persisting locations.
+                //    //foo: 'bar'                              //  <-- Android ONLY:  HTTP POST params sent to your server when persisting locations.
+                //    token: $rootScope.r_mainInfo.token
+                //},
+// 			headers: {                                   // <-- Android ONLY:  Optional HTTP headers sent to your configured #url when persisting locations
+// 				"X-Foo": "BAR"
+// 			},
+                desiredAccuracy: 5,
+                stationaryRadius: 5,
+                distanceFilter: 5,
+                notificationTitle: 'Background tracking', // <-- android only, customize the title of the notification
+                notificationText: 'ENABLED', // <-- android only, customize the text of the notification
+                activityType: 'AutomotiveNavigation',
+                debug: true, // <-- enable this hear sounds for background-geolocation life-cycle.
+                stopOnTerminate: false // <-- enable this to clear background location settings when the app terminates
+            });
         });
     })
 
@@ -126,10 +213,14 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
 app.controller('baseCtrl', function ($scope, $rootScope, $state, $ionicPopup, $http) {
     $rootScope.r_infoNeedUpdateTime = 0;
 
-    $rootScope.r_lastLocation = {
-        lng: null,
-        lat: null
-    }
+    if (!($rootScope.r_lastLocation)){
+        //console.log('reset location old:' + $rootScope.r_lastLocation);
+        $rootScope.r_lastLocation = {
+            lng: null,
+            lat: null,
+            updateTime: null
+        }
+    };
 
     $rootScope.r_curMeet = null;
 
@@ -140,7 +231,6 @@ app.controller('baseCtrl', function ($scope, $rootScope, $state, $ionicPopup, $h
 
     $rootScope.r_mainInfo = null;
 
-    $rootScope.r_serverRoot = "http://192.168.1.15:3000/";
     $rootScope.r_imagePath = $rootScope.r_serverRoot + 'images/';
     $rootScope.r_sysImagePath = $rootScope.r_serverRoot + 'images/system/';
 
@@ -266,8 +356,11 @@ app.controller('loginCtrl', function ($scope, $rootScope, $state, PPHttp, $cordo
             },
             //success
             function (data, status) {
+                $rootScope.r_bgGeo.start();
+                $cordovaToast.showShortCenter("ppstart");
+
                 $rootScope.r_mainInfo = data.ppData;
-                console.log($rootScope.r_mainInfo);
+                //console.log($rootScope.r_mainInfo);
                 window.localStorage['username'] = data.ppData.user.username;
                 window.localStorage['nickname'] = data.ppData.user.nickname;
                 window.localStorage['token'] = data.ppData.token;
@@ -379,7 +472,7 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, $io
             else if (meet.creater.username == $rootScope.r_mainInfo.user.username)
             {
                 $rootScope.r_curMeet = meet;
-                console.log(meet);
+                //console.log(meet);
                 $scope.modal.show();
             }
         }
@@ -451,8 +544,8 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, $io
             &&
             moment().startOf('day').add(0, 'hours').isBefore($rootScope.r_mainInfo.user.specialInfoTime)
             )){
-            console.log($rootScope.r_mainInfo.user.specialInfoTime);
-            console.log(moment().startOf('day').add(4, 'hours').isBefore($rootScope.r_mainInfo.user.specialInfoTime));
+            //console.log($rootScope.r_mainInfo.user.specialInfoTime);
+            //console.log(moment().startOf('day').add(4, 'hours').isBefore($rootScope.r_mainInfo.user.specialInfoTime));
 
             $rootScope.r_mainInfo.user.specialInfo.hair = null;
             $rootScope.r_mainInfo.user.specialInfo.glasses = null;
@@ -461,7 +554,7 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, $io
             $rootScope.r_mainInfo.user.specialInfo.clothesStyle = null;
             $rootScope.r_mainInfo.user.specialPic = null;
         }
-        console.log($rootScope.r_mainInfo);
+        //console.log($rootScope.r_mainInfo);
         $state.go('tab.meet.info');
     };
 });
@@ -605,7 +698,7 @@ app.controller('meetInfoCtrl', function($scope, $rootScope, $state, $ionicModal,
                     .then(function(result) {
                         $rootScope.r_mainInfo.user.specialPic = (JSON.parse(result.response))["ppResult"];
                         $rootScope.r_mainInfo.user.specialPicDisplay = $rootScope.r_mainInfo.user.specialPic;
-                        console.log($rootScope.r_mainInfo.user.specialPic);
+                        //console.log($rootScope.r_mainInfo.user.specialPic);
                     }, function(err) {
                         console.log(err);
                         $cordovaToast.showShortCenter(err);
@@ -626,30 +719,40 @@ app.controller('meetInfoCtrl', function($scope, $rootScope, $state, $ionicModal,
 
 });
 
-app.controller('profileCtrl', function($scope, $rootScope, $state, $ionicHistory, $timeout, $ionicLoading, $http, $cordovaToast) {
+app.controller('profileCtrl', function($scope, $rootScope, $state, $ionicHistory, $timeout, $ionicLoading, $http, $cordovaToast, PPHttp) {
 
     $scope.getCurMapPosition = function()
     {
-        //console.log($rootScope.r_lastLocation);
-        $http.jsonp("http://api.map.baidu.com/geoconv/v1/?callback=JSON_CALLBACK&ak=MgBALVVeCd8THVBi6gPdvsvG&coords=" + $rootScope.r_lastLocation.lng + "," + $rootScope.r_lastLocation.lat).
-            success(function(data, status, headers, config) {
-                //转换为百度坐标
-                if (data.status == 0)
-                {
-                $scope.bLng = data.result[0].x;
-                $scope.bLat = data.result[0].y;
-                $scope.mapUpdateTime = new Date();
-                }
-                else
-                {
-                    console.log(data.message);
-                    $cordovaToast.showShortCenter(data.message);
-                }
-            }).
-            error(function(err){
-                console.log(err);
-                $cordovaToast.showShortCenter(err);
-            });
+        PPHttp.do(
+            'p',
+            'getLastLocation',
+            {
+                token: $rootScope.r_mainInfo.token
+            },
+            function (data, status) {
+                console.log(data);
+                $scope.lastLocation = data.ppData.lastLocation;
+                $scope.lastLocationTime = data.ppData.lastLocationTime;
+                $http.jsonp("http://api.map.baidu.com/geoconv/v1/?callback=JSON_CALLBACK&ak=MgBALVVeCd8THVBi6gPdvsvG&coords=" + $scope.lastLocation[0] + "," + $scope.lastLocation[1]).
+                    success(function(data, status, headers, config) {
+                        //转换为百度坐标
+                        if (data.status == 0)
+                        {
+                            $scope.bLng = data.result[0].x;
+                            $scope.bLat = data.result[0].y;
+                        }
+                        else
+                        {
+                            console.log(data.message);
+                            $cordovaToast.showShortCenter(data.message);
+                        }
+                    }).
+                    error(function(err){
+                        console.log(err);
+                        $cordovaToast.showShortCenter(err);
+                    });
+            }
+        );
     }
 
     $scope.mapLocs = [];
@@ -681,6 +784,13 @@ app.filter("objectIDtoDate", function () {
     return function (objectID) {
         moment.locale('zh-cn');
         return moment(new Date(parseInt((""+objectID).substr(0,8), 16)*1000));
+    };
+})
+
+app.filter("stringToDate", function () {
+    return function (dateString) {
+        moment.locale('zh-cn');
+        return moment(new Date(dateString));
     };
 })
 
