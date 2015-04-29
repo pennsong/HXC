@@ -360,7 +360,7 @@ app.controller('loginCtrl', function ($scope, $rootScope, $state, PPHttp, $cordo
                 $cordovaToast.showShortCenter("ppstart");
 
                 $rootScope.r_mainInfo = data.ppData;
-                //console.log($rootScope.r_mainInfo);
+                console.log($rootScope.r_mainInfo);
                 window.localStorage['username'] = data.ppData.user.username;
                 window.localStorage['nickname'] = data.ppData.user.nickname;
                 window.localStorage['token'] = data.ppData.token;
@@ -429,8 +429,8 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, $io
             $rootScope.r_curMeet = meet;
             $rootScope.r_searchMode = '确认';
 
-            if (!($rootScope.r_meetTargetUpdated[meet._id]))
-            //if ($rootScope.r_meetTargetUpdated[meet._id])
+            //if (!($rootScope.r_meetTargetUpdated[meet._id])) //test
+            if ($rootScope.r_meetTargetUpdated[meet._id])
             {
                 PPHttp.do(
                     'p',
@@ -559,9 +559,227 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, $io
     };
 });
 
-app.controller('meetConditionCtrl', function($scope, $rootScope, $state, $ionicModal, $timeout) {
+app.controller('meetConditionCtrl', function($scope, $rootScope, $state, $ionicModal, $timeout, $http, $cordovaToast, $ionicLoading, PPHttp) {
     $scope.bLng = null;
     $scope.bLat = null;
+
+    $scope.searchTargets = function(){
+        if (!(
+            $rootScope.r_meetCondition.specialInfo.sex
+            && $rootScope.r_meetCondition.specialInfo.clothesColor
+            && $rootScope.r_meetCondition.specialInfo.clothesStyle
+            && $rootScope.r_meetCondition.specialInfo.clothesType
+            && $rootScope.r_meetCondition.specialInfo.glasses
+            && $rootScope.r_meetCondition.specialInfo.hair
+            && $rootScope.r_meetCondition.mapLoc.uid
+            )){
+            $cordovaToast.showShortCenter('请把条件填写完整');
+            return;
+        }
+        if (!($rootScope.r_lastLocation.lng && $rootScope.r_lastLocation.lat))
+        {
+            $cordovaToast.showShortCenter('未能获取您的当前位置,请调整位置后重试');
+            return;
+        }
+        $ionicLoading.show({
+            template: '努力搜索中...'
+        });
+        if ($rootScope.r_searchMode == '回复')
+        {
+            PPHttp.do(
+                'p',
+                'replyMeetSearchTarget',
+                {
+                    token: $rootScope.r_mainInfo.token,
+                    sex: $rootScope.r_meetCondition.specialInfo.sex,
+                    hair: $rootScope.r_meetCondition.specialInfo.hair,
+                    glasses: $rootScope.r_meetCondition.specialInfo.glasses,
+                    clothesType: $rootScope.r_meetCondition.specialInfo.clothesType,
+                    clothesColor: $rootScope.r_meetCondition.specialInfo.clothesColor,
+                    clothesStyle: $rootScope.r_meetCondition.specialInfo.clothesStyle,
+                    meetId: $rootScope.r_curMeet._id
+                },
+                function (data, status) {
+                    if (data.ppResult == 'ok') {
+                        $rootScope.r_targets = data.ppData;
+                        $state.go('tab.meet.condition.specialPic');
+                    }
+                }
+            ).finally(
+                function(){
+                    $ionicLoading.hide();
+                }
+            );
+        }
+        else
+        {
+            PPHttp.do(
+                'p',
+                'createMeetSearchTarget',
+                {
+                    token: $rootScope.r_mainInfo.token,
+                    sex: $rootScope.r_meetCondition.specialInfo.sex,
+                    hair: $rootScope.r_meetCondition.specialInfo.hair,
+                    glasses: $rootScope.r_meetCondition.specialInfo.glasses,
+                    clothesType: $rootScope.r_meetCondition.specialInfo.clothesType,
+                    clothesColor: $rootScope.r_meetCondition.specialInfo.clothesColor,
+                    clothesStyle: $rootScope.r_meetCondition.specialInfo.clothesStyle
+                },
+                function (data, status) {
+                    if (data.ppResult == 'ok') {
+                        $rootScope.r_targets = data.ppData;
+                        $state.go('tab.meet.condition.specialPic');
+                    }
+                }
+            ).finally(
+                function(){
+                    $ionicLoading.hide();
+                }
+            );
+        }
+    };
+
+    $ionicModal.fromTemplateUrl(
+        'templates/option.html',
+        function($ionicModal) {
+            $scope.modal = $ionicModal;
+        },
+        {
+            // Use our scope for the scope of the modal to keep it simple
+            scope: $scope,
+            // The animation we want to use for the modal entrance
+            animation: 'slide-in-up'
+        }
+    );
+
+    $scope.changeKeyword = function(keyword){
+        if ($scope.timer)
+        {
+            clearInterval($scope.timer);
+        }
+        $scope.timer = setInterval(function(){
+            if ($scope.timer)
+            {
+                clearInterval($scope.timer);
+            }
+            $scope.searchLoc(keyword);
+        }, 300);
+    };
+
+    $scope.searchLoc = function(keyword){
+        var ak = "F9266a6c6607e33fb7c3d8da0637ce0b";
+        var output = "json";
+        var radius = "2000";
+        var scope = "1";
+        var data = "query=" + encodeURIComponent(keyword);
+        data += "&ak=" + ak;
+        data += "&output=" + output;
+        data += "&radius=" + radius;
+        data += "&scope=" + scope;
+        data += "&location=" + $scope.bLat + "," + $scope.bLng;
+        data += "&filter=sort_name:distance";
+
+        $http.jsonp("http://api.map.baidu.com/place/v2/search?callback=JSON_CALLBACK&" + data).
+            success(function(data, status, headers, config) {
+                //查询结果
+                $rootScope.r_curOptions = data.results;
+
+            })
+            .error(function(err){
+                console.log(err);
+                $cordovaToast.showShortCenter(err);
+            });
+    };
+
+    $scope.clickInfoItem = function(item){
+        if ($rootScope.searchMode == '确认')
+        {
+            //确认meet时条件不可调整
+            return;
+        }
+        if (item == '地点')
+        {
+            if ($rootScope.searchMode == '回复')
+            {
+                //回复meet时地点不可调整
+                return;
+            }
+            $rootScope.r_curOptions = [];
+            if (!($rootScope.r_lastLocation.lng && $rootScope.r_lastLocation.lat))
+            {
+                console.log('未能获取您的当前位置,请调整位置后重试!');
+                $cordovaToast.showShortCenter('未能获取您的当前位置,请调整位置后重试!');
+                return;
+            }
+            $http.jsonp("http://api.map.baidu.com/geoconv/v1/?callback=JSON_CALLBACK&ak=MgBALVVeCd8THVBi6gPdvsvG&coords=" + $rootScope.r_lastLocation.lng + "," + $rootScope.r_lastLocation.lat).
+                success(function(data, status, headers, config) {
+                    //转换为百度坐标
+                    $scope.bLng = data.result[0].x;
+                    $scope.bLat = data.result[0].y;
+                    $rootScope.r_curOptionName = item;
+
+                    $scope.modal.show();
+                })
+                .error(function(err){
+                    console.log(err);
+                    $cordovaToast.showShortCenter(err);
+                });
+            return;
+        }
+
+        switch(item) {
+            case "性别":
+                $rootScope.r_curOptions = $rootScope.r_sex;
+                break;
+            case "发型":
+                $rootScope.r_curOptions = $rootScope.r_hair;
+                break;
+            case "眼镜":
+                $rootScope.r_curOptions = $rootScope.r_glasses;
+                break;
+            case "衣服类型":
+                $rootScope.r_curOptions = $rootScope.r_clothesType;
+                break;
+            case "衣服颜色":
+                $rootScope.r_curOptions = $rootScope.r_clothesColor;
+                break;
+            case "衣服花纹":
+                $rootScope.r_curOptions = $rootScope.r_clothesStyle;
+                break;
+            default:
+        }
+        $rootScope.r_curOptionName = item;
+        $scope.modal.show();
+    };
+
+    $scope.clickItem = function(item){
+        switch($rootScope.r_curOptionName) {
+            case "地点":
+                $rootScope.r_meetCondition.mapLoc = item;
+                break;
+            case "性别":
+                $rootScope.r_meetCondition.specialInfo.sex = item;
+                break;
+            case "发型":
+                $rootScope.r_meetCondition.specialInfo.hair = item;
+                break;
+            case "眼镜":
+                $rootScope.r_meetCondition.specialInfo.glasses = item;
+                break;
+            case "衣服类型":
+                $rootScope.r_meetCondition.specialInfo.clothesType = item;
+                break;
+            case "衣服颜色":
+                $rootScope.r_meetCondition.specialInfo.clothesColor = item;
+                break;
+            case "衣服花纹":
+                $rootScope.r_meetCondition.specialInfo.clothesStyle = item;
+                break;
+            default:
+
+        }
+        $scope.modal.hide();
+    }
 });
 
 app.controller('meetInfoCtrl', function($scope, $rootScope, $state, $ionicModal, $cordovaCamera, PPHttp, $cordovaToast, $cordovaFileTransfer, $ionicLoading) {
