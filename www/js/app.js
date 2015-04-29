@@ -1,12 +1,3 @@
-function ppCopyObj(source, destination) {
-    for (var property in destination) {
-        if (typeof destination[property] === "object") {
-            ppCopyObj(source[property], destination[property]);
-        } else {
-            destination[property] = source[property];
-        }
-    }
-};
 // Ionic Starter App
 
 // angular.module is a global place for creating, registering and retrieving Angular modules
@@ -22,6 +13,110 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
             // for form inputs)
             $rootScope.r_serverRoot = "http://192.168.1.15:3000/";
             //$rootScope.r_serverRoot = "http://218.79.184.235:3000/";
+            $rootScope.r_infoNeedUpdateTime = 0;
+
+            $rootScope.r_curMeet = null;
+
+            $rootScope.r_searchMode = null;
+
+            $rootScope.r_curOptions = [];
+            $rootScope.r_curOptionName = null;
+
+            $rootScope.r_mainInfo = null;
+
+            $rootScope.r_imagePath = $rootScope.r_serverRoot + 'images/';
+            $rootScope.r_sysImagePath = $rootScope.r_serverRoot + 'images/system/';
+
+            $rootScope.r_curOptions = [];
+            $rootScope.r_curOptionName = null;
+
+            $rootScope.r_curChatFriendUsername = null;
+
+            $rootScope.r_myLocation = {
+                lng: null,
+                lat: null
+            }
+
+            $rootScope.r_myInfo = {
+                "specialInfo": {
+                    "sex": null,
+                    "clothesColor": null,
+                    "clothesStyle": null,
+                    "clothesType": null,
+                    "glasses": null,
+                    "hair": null
+                },
+                specialPic: null,
+                specialPicDisplay: null
+            }
+
+            $rootScope.r_meetCondition = {
+                mapLoc: {
+                    uid: '',
+                    name: '',
+                    address: ''
+                },
+                specialInfo: {
+                    sex: '',
+                    clothesColor: '',
+                    clothesStyle: '',
+                    clothesType: '',
+                    glasses: '',
+                    hair: ''
+                }
+            };
+
+            $rootScope.r_meetTargetUpdated = {};
+
+            $rootScope.r_targets = [];
+
+            $rootScope.r_sex = [
+                "男",
+                "女"
+            ];
+
+            $rootScope.r_hair = [
+                "竖起",
+                "躺下",
+                "辫子/盘发",
+                "短发(齐肩,不过肩)",
+                "长发(过肩)",
+                "戴帽子"
+            ];
+
+            $rootScope.r_glasses = [
+                "带",
+                "无"//"不带"
+            ];
+
+            $rootScope.r_clothesType = [
+                "大衣",//"风衣/大衣/夹克",
+                "西装/套装",
+                "运动外套/卫衣",
+                "T恤长袖",
+                "T恤短袖",
+                "马甲/背心",
+                "长袖衬衫",
+                "短袖衬衫",
+                "毛衣/羊毛绒/线衫/针织"
+            ];
+
+            $rootScope.r_clothesColor = [
+                "红/紫/粉",
+                "黄",
+                "蓝/绿",
+                "白",
+                "黑",
+                "灰",
+                "无法分辨主要颜色"
+            ];
+
+            $rootScope.r_clothesStyle = [
+                "纯色",
+                "线条/格子/色块",
+                "图案(抽象,卡通,画等)"
+            ];
+
 
             $cordovaKeyboard.hideAccessoryBar(true)
 
@@ -56,8 +151,9 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
                     },
                     //success
                     function (data, status) {
-                        $rootScope.r_lastLocation = data.ppData;
-                        $cordovaToast.showShortCenter($rootScope.r_lastLocation.lng + "," + $rootScope.r_lastLocation.lat);
+                        $rootScope.r_mainInfo.user.lastLocation = data.ppData.lastLocation;
+                        $rootScope.r_mainInfo.user.lastLocationTime = data.ppData.lastLocationTime;
+                        $cordovaToast.showShortCenter($rootScope.r_mainInfo.user.lastLocation[0] + "," + $rootScope.r_mainInfo.user.lastLocation[1]);
                         //console.log(data.ppData);
                     }
                 ).finally(
@@ -210,121 +306,6 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
             });
     });
 
-app.controller('baseCtrl', function ($scope, $rootScope, $state, $ionicPopup, $http) {
-    $rootScope.r_infoNeedUpdateTime = 0;
-
-    if (!($rootScope.r_lastLocation)){
-        //console.log('reset location old:' + $rootScope.r_lastLocation);
-        $rootScope.r_lastLocation = {
-            lng: null,
-            lat: null,
-            updateTime: null
-        }
-    };
-
-    $rootScope.r_curMeet = null;
-
-    $rootScope.r_searchMode = null;
-
-    $rootScope.r_curOptions = [];
-    $rootScope.r_curOptionName = null;
-
-    $rootScope.r_mainInfo = null;
-
-    $rootScope.r_imagePath = $rootScope.r_serverRoot + 'images/';
-    $rootScope.r_sysImagePath = $rootScope.r_serverRoot + 'images/system/';
-
-    $rootScope.r_curOptions = [];
-    $rootScope.r_curOptionName = null;
-
-    $rootScope.r_curChatFriendUsername = null;
-
-    $rootScope.r_myLocation = {
-        lng: null,
-        lat: null
-    }
-
-    $rootScope.r_myInfo = {
-        "specialInfo": {
-            "sex": null,
-            "clothesColor": null,
-            "clothesStyle": null,
-            "clothesType": null,
-            "glasses": null,
-            "hair": null
-        },
-        specialPic: null,
-        specialPicDisplay: null
-    }
-
-    $rootScope.r_meetCondition = {
-        mapLoc: {
-            uid: '',
-            name: '',
-            address: ''
-        },
-        specialInfo: {
-            sex: '',
-            clothesColor: '',
-            clothesStyle: '',
-            clothesType: '',
-            glasses: '',
-            hair: ''
-        }
-    };
-
-    $rootScope.r_meetTargetUpdated = {};
-
-    $rootScope.r_targets = [];
-
-    $rootScope.r_sex = [
-        "男",
-        "女"
-    ];
-
-    $rootScope.r_hair = [
-        "竖起",
-        "躺下",
-        "辫子/盘发",
-        "短发(齐肩,不过肩)",
-        "长发(过肩)",
-        "戴帽子"
-    ];
-
-    $rootScope.r_glasses = [
-        "带",
-        "不带"
-    ];
-
-    $rootScope.r_clothesType = [
-        "风衣/大衣/夹克",
-        "西装/套装",
-        "运动外套/卫衣",
-        "T恤长袖",
-        "T恤短袖",
-        "马甲/背心",
-        "长袖衬衫",
-        "短袖衬衫",
-        "毛衣/羊毛绒/线衫/针织"
-    ];
-
-    $rootScope.r_clothesColor = [
-        "红/紫/粉",
-        "黄",
-        "蓝/绿",
-        "白",
-        "黑",
-        "灰",
-        "无法分辨主要颜色"
-    ];
-
-    $rootScope.r_clothesStyle = [
-        "纯色",
-        "线条/格子/色块",
-        "图案(抽象,卡通,画等)"
-    ];
-});
-
 app.controller('loginCtrl', function ($scope, $rootScope, $state, PPHttp, $cordovaToast) {
     $scope.user = {};
 
@@ -425,7 +406,11 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, $io
     $scope.clickMeet = function(meet){
         if (meet.status=='待确认')
         {
-            ppCopyObj(meet, $rootScope.r_meetCondition);
+            $rootScope.r_meetCondition = {
+                mapLoc: meet.mapLoc,
+                specialInfo: meet.specialInfo
+            };
+
             $rootScope.r_curMeet = meet;
             $rootScope.r_searchMode = '确认';
 
@@ -514,7 +499,6 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, $io
                 if (data.ppResult == 'ok') {
                     $rootScope.r_searchMode = '发起';
                     $rootScope.r_meetCondition = {
-                        meetId: null,
                         mapLoc: {
                             uid: null,
                             name: null,
@@ -576,7 +560,7 @@ app.controller('meetConditionCtrl', function($scope, $rootScope, $state, $ionicM
             $cordovaToast.showShortCenter('请把条件填写完整');
             return;
         }
-        if (!($rootScope.r_lastLocation.lng && $rootScope.r_lastLocation.lat))
+        if (!($rootScope.r_mainInfo.user.lastLocation[0] && $rootScope.r_mainInfo.user.lastLocation[1]))
         {
             $cordovaToast.showShortCenter('未能获取您的当前位置,请调整位置后重试');
             return;
@@ -683,7 +667,6 @@ app.controller('meetConditionCtrl', function($scope, $rootScope, $state, $ionicM
             success(function(data, status, headers, config) {
                 //查询结果
                 $rootScope.r_curOptions = data.results;
-
             })
             .error(function(err){
                 console.log(err);
@@ -705,13 +688,13 @@ app.controller('meetConditionCtrl', function($scope, $rootScope, $state, $ionicM
                 return;
             }
             $rootScope.r_curOptions = [];
-            if (!($rootScope.r_lastLocation.lng && $rootScope.r_lastLocation.lat))
+            if (!($rootScope.r_mainInfo.user.lastLocation[0] && $rootScope.r_mainInfo.user.lastLocation[1]))
             {
                 console.log('未能获取您的当前位置,请调整位置后重试!');
                 $cordovaToast.showShortCenter('未能获取您的当前位置,请调整位置后重试!');
                 return;
             }
-            $http.jsonp("http://api.map.baidu.com/geoconv/v1/?callback=JSON_CALLBACK&ak=MgBALVVeCd8THVBi6gPdvsvG&coords=" + $rootScope.r_lastLocation.lng + "," + $rootScope.r_lastLocation.lat).
+            $http.jsonp("http://api.map.baidu.com/geoconv/v1/?callback=JSON_CALLBACK&ak=MgBALVVeCd8THVBi6gPdvsvG&coords=" + $rootScope.r_mainInfo.user.lastLocation[0] + "," + $rootScope.r_mainInfo.user.lastLocation[1]).
                 success(function(data, status, headers, config) {
                     //转换为百度坐标
                     $scope.bLng = data.result[0].x;
@@ -999,7 +982,186 @@ app.controller('profileCtrl', function($scope, $rootScope, $state, $ionicHistory
     }
 });
 
-app.controller('conditionSpecialCtrl', function($scope, $rootScope, $state, $ionicModal, $ionicHistory, PPHttp) {
+app.controller('conditionSpecialCtrl', function($scope, $rootScope, $state, $ionicModal, $ionicHistory, $ionicLoading, PPHttp) {
+    $ionicModal.fromTemplateUrl(
+        'templates/bigSpecialPic.html',
+        function($ionicModal) {
+            $scope.modal = $ionicModal;
+        },
+        {
+            // Use our scope for the scope of the modal to keep it simple
+            scope: $scope,
+            // The animation we want to use for the modal entrance
+            animation: 'slide-in-up'
+        }
+    );
+
+    $scope.getBigPic = function(targetUsername, targetSpecialPic){
+        $scope.targetUsername = targetUsername;
+        $scope.targetSpecialPic = targetSpecialPic;
+        $scope.modal.show();
+    }
+
+    $scope.yes = function(targetUsername){
+        if ($rootScope.searchMode == '回复')
+        {
+            if (targetUsername == 'fake')
+            {
+                $http.put(
+                    $rootScope.serverRoot + 'fakeSelect',
+                    {
+                        username: $rootScope.user.username
+                    }
+                )
+                    .success(function(data, status, headers, config){
+                        // this callback will be called asynchronously
+                        // when the response is available
+                        $http.put(
+                            $rootScope.serverRoot + 'replyReduce',
+                            {
+                                username: $rootScope.user.username,
+                                meetId: $rootScope.curMeet._id
+                            }
+                        )
+                            .success(function(data, status, headers, config){
+                                // this callback will be called asynchronously
+                                // when the response is available
+                                $rootScope.showPopup('请仔细选择图片!, 还剩回复次数:' + data.result);
+                            }).
+                            error($rootScope.ppError);
+                    }).
+                    error($rootScope.ppError);
+            }
+            else {
+                if ($rootScope.curMeet.creater.username == targetUsername) {
+                    $http.post(
+                        $rootScope.serverRoot + 'replySuccess',
+                        {
+                            creater_username: targetUsername,
+                            target_username: $rootScope.user.username,
+                            meetId: $rootScope.curMeet._id
+                        }
+                    )
+                        .success(function(data, status, headers, config){
+                            // this callback will be called asynchronously
+                            // when the response is available
+                            $rootScope.showPopup('恭喜你!已加入好友列表,赶紧行动吧!');
+                        }).
+                        error($rootScope.ppError);
+
+                }
+                else {
+                    $http.put(
+                        $rootScope.serverRoot + 'replyReduce',
+                        {
+                            meetId: $rootScope.curMeet._id
+                        }
+                    )
+                        .success(function(data, status, headers, config){
+                            // this callback will be called asynchronously
+                            // when the response is available
+                            $rootScope.showPopup('没猜对哦!, 还剩回复次数:' + data.result);
+                        }).
+                        error($rootScope.ppError);
+                }
+            }
+            $ionicHistory.nextViewOptions({
+                disableAnimate: true,
+                disableBack: true,
+                historyRoot: true
+            });
+            $state.go('tab.meet');
+            $scope.modal.hide();
+
+        }
+        //searchMode == '新建' || '确认'
+        else
+        {
+            if ($rootScope.searchMode == '确认')
+            {
+                delete $rootScope.meetTargetUpdated[$rootScope.curMeet._id];
+            }
+            if (targetUsername == 'fake')
+            {
+                $http.put(
+                    $rootScope.serverRoot + 'fakeSelect',
+                    {
+                        username: $rootScope.user.username
+                    }
+                )
+                    .success(function(data, status, headers, config){
+                        // this callback will be called asynchronously
+                        // when the response is available
+                        $rootScope.showPopup('请仔细选择图片!');
+                        $ionicHistory.nextViewOptions({
+                            disableAnimate: true,
+                            disableBack: true,
+                            historyRoot: true
+                        });
+                        $state.go('tab.meet');
+                        $scope.modal.hide();
+                    }).
+                    error($rootScope.ppError);
+            }
+            else
+            {
+                $scope.uploadMeet('待回复');
+            }
+        }
+    }
+
+    $scope.no = function(){
+        $ionicLoading.show({
+            template: '处理中...'
+        });
+        if ($rootScope.searchMode == '回复' || $rootScope.searchMode == '确认')
+        {
+            if ($rootScope.searchMode == '确认')
+            {
+                delete $rootScope.meetTargetUpdated[$rootScope.curMeet._id];
+            }
+            $ionicHistory.nextViewOptions({
+                disableAnimate: true,
+                disableBack: true,
+                historyRoot: true
+            });
+            $state.go('tab.meet');
+            $scope.modal.hide();
+        }
+        else{
+            PPHttp.do
+            (
+                'p',
+                'createMeetNo', {
+                    token: $rootScope.r_mainInfo.token,
+                    mapLocName: $rootScope.r_meetCondition.mapLoc.name,
+                    mapLocUid: $rootScope.r_meetCondition.mapLoc.uid,
+                    mapLocAddress: $rootScope.r_meetCondition.mapLoc.address,
+                    sex: $rootScope.r_meetCondition.specialInfo.sex,
+                    hair: $rootScope.r_meetCondition.specialInfo.hair,
+                    glasses: $rootScope.r_meetCondition.specialInfo.glasses,
+                    clothesType: $rootScope.r_meetCondition.specialInfo.clothesType,
+                    clothesColor: $rootScope.r_meetCondition.specialInfo.clothesColor,
+                    clothesStyle: $rootScope.r_meetCondition.specialInfo.clothesStyle
+                },
+                //success
+                function (data, status) {
+                    $ionicHistory.nextViewOptions({
+                        disableAnimate: true,
+                        disableBack: true,
+                        historyRoot: true
+                    });
+                    $state.go('tab.meet');
+                    $scope.modal.hide();
+                }
+            ).finally(
+                function() {
+                    $ionicLoading.hide();
+                }
+            );
+        }
+    }
+
 });
 
 app.filter("objectIDtoDate", function () {
