@@ -24,10 +24,6 @@
     "org.apache.cordova.file-transfer"
   ],
   "cordovaPlatforms": [
-    "ios",
-    {
-      "platform": "android",
-      "locator": "browser"
-    }
+    "ios"
   ]
 }

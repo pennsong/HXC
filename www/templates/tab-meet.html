@@ -11,8 +11,8 @@
         <ion-refresher pulling-text="下拉刷新" on-refresh="doRefresh()">
         </ion-refresher>
         <div class="list">
-            <a class="item item-thumbnail-left" href="#" ng-repeat="item in r_mainInfo.meets" ng-click="clickMeet(item)">
-                <img ng-src="{{'img/' + item.logo}}"><span class="badge badge-assertive" ng-show="meetTargetUpdated[item._id]">{{meetTargetUpdated[item._id]}}</span>
+            <a class="item item-thumbnail-left" ng-class="{unread:unread(item)}" href="#" ng-repeat="item in r_mainInfo.meets | orderBy: '-_id' " ng-click="clickMeet(item)">
+                <img ng-src="{{'img/' + item.logo}}">
                 <h2>{{item.mapLoc.name}}</h2>
                 <p>{{item.mapLoc.address}}</p>
                 <p>{{item.status}}</p>

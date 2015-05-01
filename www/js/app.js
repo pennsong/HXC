@@ -11,8 +11,9 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
         $ionicPlatform.ready(function () {
             // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
             // for form inputs)
-            $rootScope.r_serverRoot = "http://192.168.1.15:3000/";
+            $rootScope.r_serverRoot = "http://192.168.1.101:3000/";
             //$rootScope.r_serverRoot = "http://218.79.184.235:3000/";
+            //$rootScope.r_serverRoot = "http://localhost:3000/";
             $rootScope.r_infoNeedUpdateTime = 0;
 
             $rootScope.r_curMeet = null;
@@ -306,7 +307,7 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
             });
     });
 
-app.controller('loginCtrl', function ($scope, $rootScope, $state, PPHttp, $cordovaToast) {
+app.controller('loginCtrl', function ($scope, $rootScope, $state, $cordovaToast, PPHttp, Push, Unread) {
     $scope.user = {};
 
     $scope.goRegister = function () {
@@ -337,6 +338,62 @@ app.controller('loginCtrl', function ($scope, $rootScope, $state, PPHttp, $cordo
             },
             //success
             function (data, status) {
+                //jpush
+                document.addEventListener("jpush.receiveNotification", function(event) {
+                    $cordovaToast.showShortCenter(event.aps.alert);
+                    console.log("jpush.receiveNotification");
+                    PPHttp.do
+                    (
+                        'p',
+                        'getUnread', {
+                            token: $rootScope.r_mainInfo.token
+                        },
+                        //success
+                        function (data, status) {
+                            console.log(data.ppData);
+                            Unread.do($rootScope.r_mainInfo.meets, data.ppData.meets);
+                        }
+                    );
+                }, false);
+
+                document.addEventListener("jpush.openNotification", function(event) {
+                    $cordovaToast.showShortCenter(event.aps.alert);
+                    console.log("jpush.openNotification");
+                    PPHttp.do
+                    (
+                        'p',
+                        'getUnread', {
+                            token: $rootScope.r_mainInfo.token
+                        },
+                        //success
+                        function (data, status) {
+                            console.log(data.ppData);
+                            Unread.do($rootScope.r_mainInfo.meets, data.ppData.meets);
+                        }
+                    );
+                }, false);
+
+                //// push notification callback
+                //var notificationCallback = function(data) {
+                //    console.log('pp received data :' + data);
+                //    var notification = angular.fromJson(data);
+                //    console.log(notification);
+                //    //app 是否处于正在运行状态
+                //    var isActive = notification.isActive;
+                //
+                //    // here add your code
+                //
+                //    //ios
+                //    if (ionic.Platform.isIOS()) {
+                //        $cordovaToast.showShortCenter(notification.aps.alert);
+                //    } else {
+                //        //非 ios(android)
+                //    }
+                //};
+
+                Push.init();
+                Push.setAlias(data.ppData.user.username);
+
                 $rootScope.r_bgGeo.start();
                 $cordovaToast.showShortCenter("ppstart");
 
@@ -403,7 +460,41 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, $io
         }
     );
 
+    $scope.unread = function(meet){
+        if (
+            (meet.creater.username == $rootScope.r_mainInfo.user.username && meet.creater.unread == true)
+            ||
+            (meet.target && meet.target.username == $rootScope.r_mainInfo.user.username && meet.target.unread == true)
+        )
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    };
+
+    $scope.read = function(meet){
+        if (meet.creater.username == $rootScope.r_mainInfo.user.username && meet.creater.unread == true)
+        {
+            meet.creater.unread = false;
+        }
+        else if (meet.target && meet.target.username == $rootScope.r_mainInfo.user.username && meet.target.unread == true)
+        {
+            meet.target.unread = false;
+        }
+        PPHttp.do(
+            'p',
+            'read', {
+                token: $rootScope.r_mainInfo.token,
+                meetId: meet._id
+            }
+        );
+    };
+
     $scope.clickMeet = function(meet){
+        $scope.read(meet);
         if (meet.status=='待确认')
         {
             $rootScope.r_meetCondition = {
@@ -1220,6 +1311,59 @@ app.factory('PPHttp', function ($rootScope, $http, $cordovaToast) {
                     return $http.post($rootScope.r_serverRoot + "users/" + path, p)
                         .success(s)
                         .error(e);
+            }
+        }
+    };
+});
+
+app.factory('Push', function() {
+    var push;
+
+    return {
+        setBadge: function(badge) {
+            if (push) {
+                console.log('jpush: set badge', badge);
+                plugins.jPushPlugin.setBadge(badge);
+            }
+        },
+        setAlias: function(alias) {
+            if (push) {
+                console.log('jpush: set alias', alias);
+                plugins.jPushPlugin.setAlias(alias);
+            }
+        },
+        init: function() {
+            console.log('jpush: start init-----------------------');
+            push = window.plugins && window.plugins.jPushPlugin;
+            if (push) {
+                console.log('jpush: init');
+                plugins.jPushPlugin.init();
+                plugins.jPushPlugin.setDebugMode(true);
+                //plugins.jPushPlugin.openNotificationInAndroidCallback = notificationCallback;
+                //plugins.jPushPlugin.receiveNotificationIniOSCallback = notificationCallback;
+                //plugins.jPushPlugin.receiveMessageIniOSCallback = notificationCallback;
+            }
+        }
+    };
+});
+
+app.factory('Unread', function() {
+    return {
+        do: function(oldArray, unreadArray) {
+            var oldIdArray = oldArray.map(function(item){
+                return item._id;
+            });
+            for (var i = 0; i < unreadArray.length; i++)
+            {
+                var tmpIndex = oldIdArray.indexOf(unreadArray[i]._id);
+                if (tmpIndex > -1)
+                {
+                    oldArray[tmpIndex] = unreadArray[i];
+                }
+                else
+                {
+                    oldArray.push(unreadArray[i]);
+                }
             }
         }
     };
