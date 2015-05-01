@@ -479,18 +479,25 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, $io
         if (meet.creater.username == $rootScope.r_mainInfo.user.username && meet.creater.unread == true)
         {
             meet.creater.unread = false;
+            PPHttp.do(
+                'p',
+                'read', {
+                    token: $rootScope.r_mainInfo.token,
+                    meetId: meet._id
+                }
+            );
         }
         else if (meet.target && meet.target.username == $rootScope.r_mainInfo.user.username && meet.target.unread == true)
         {
             meet.target.unread = false;
+            PPHttp.do(
+                'p',
+                'read', {
+                    token: $rootScope.r_mainInfo.token,
+                    meetId: meet._id
+                }
+            );
         }
-        PPHttp.do(
-            'p',
-            'read', {
-                token: $rootScope.r_mainInfo.token,
-                meetId: meet._id
-            }
-        );
     };
 
     $scope.clickMeet = function(meet){
