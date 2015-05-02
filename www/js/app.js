@@ -17,6 +17,8 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
             $rootScope.r_infoNeedUpdateTime = 0;
 
             $rootScope.r_curMeet = null;
+            
+            $rootScope.r_curChatFriendNickname = null;
 
             $rootScope.r_searchMode = null;
 
@@ -454,13 +456,13 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, $io
         }
     };
 
-    $scope.read = function(meet){
+    $scope.readMeet = function(meet){
         if (meet.creater.username == $rootScope.r_mainInfo.user.username && meet.creater.unread == true)
         {
             meet.creater.unread = false;
             PPHttp.do(
                 'p',
-                'read', {
+                'readMeet', {
                     token: $rootScope.r_mainInfo.token,
                     meetId: meet._id
                 }
@@ -471,7 +473,7 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, $io
             meet.target.unread = false;
             PPHttp.do(
                 'p',
-                'read', {
+                'readMeet', {
                     token: $rootScope.r_mainInfo.token,
                     meetId: meet._id
                 }
@@ -480,7 +482,7 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, $io
     };
 
     $scope.clickMeet = function(meet){
-        $scope.read(meet);
+        $scope.readMeet(meet);
         if (meet.status=='待确认')
         {
             $rootScope.r_meetCondition = {
@@ -1187,6 +1189,7 @@ app.controller('conditionSpecialCtrl', function($scope, $rootScope, $state, $ion
                         },
                         //success
                         function (data, status) {
+                            PPHttp.doRefreshAll();
                             $ionicHistory.nextViewOptions({
                                 disableAnimate: true,
                                 disableBack: true,
@@ -1255,11 +1258,23 @@ app.controller('conditionSpecialCtrl', function($scope, $rootScope, $state, $ion
 
 });
 
-app.controller('contactCtrl', function($scope, $rootScope, $state, $http) {
-    $scope.clickChat = function(friendUsername){
-        $rootScope.curChatFriendUsername = friendUsername;
+app.controller('contactCtrl', function($scope, $rootScope, $state, PPHttp) {
+    $scope.clickChat = function(friend){
+        $scope.readFriend(friend);
+        $rootScope.r_curChatFriendNickname = friend.friendNickname;
         $state.go('tab.contact.chat');
     }
+
+    $scope.readFriend = function(friend){
+        friend.unread = false;
+        PPHttp.do(
+            'p',
+            'readFriend', {
+                token: $rootScope.r_mainInfo.token,
+                friendId: friend._id
+            }
+        );
+    };
 
     $scope.doRefresh = function() {
         PPHttp
