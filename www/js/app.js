@@ -380,6 +380,7 @@ app.controller('loginCtrl', function ($scope, $rootScope, $state, $cordovaToast,
                 window.localStorage['username'] = data.ppData.user.username;
                 window.localStorage['nickname'] = data.ppData.user.nickname;
                 window.localStorage['token'] = data.ppData.token;
+                PPHttp.doRefreshAll();
                 $state.go("tab.meet");
             }
         );
