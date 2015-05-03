@@ -17,7 +17,7 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
             $rootScope.r_infoNeedUpdateTime = 0;
 
             $rootScope.r_curMeet = null;
-            
+
             $rootScope.r_curChatFriendNickname = null;
 
             $rootScope.r_searchMode = null;
