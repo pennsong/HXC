@@ -11,14 +11,16 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
         $ionicPlatform.ready(function () {
             // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
             // for form inputs)
-            $rootScope.r_serverRoot = "http://192.168.1.101:3000/";
+            $rootScope.r_serverRoot = "http://192.168.43.30:3000/";
             //$rootScope.r_serverRoot = "http://218.79.184.235:3000/";
             //$rootScope.r_serverRoot = "http://localhost:3000/";
             $rootScope.r_infoNeedUpdateTime = 0;
 
             $rootScope.r_curMeet = null;
 
+            $rootScope.r_curChatFriendUsername = null;
             $rootScope.r_curChatFriendNickname = null;
+            $rootScope.r_curChatMsg = null;
 
             $rootScope.r_searchMode = null;
 
@@ -32,8 +34,6 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
 
             $rootScope.r_curOptions = [];
             $rootScope.r_curOptionName = null;
-
-            $rootScope.r_curChatFriendUsername = null;
 
             $rootScope.r_myLocation = {
                 lng: null,
@@ -121,8 +121,10 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
             ];
 
 
-            $cordovaKeyboard.hideAccessoryBar(true)
-
+            if(window.cordova && window.cordova.plugins.Keyboard) {
+                cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
+                cordova.plugins.Keyboard.disableScroll(true);
+            }
             if (window.StatusBar) {
                 // org.apache.cordova.statusbar required
                 StatusBar.styleLightContent();
@@ -309,7 +311,7 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
             });
     });
 
-app.controller('loginCtrl', function ($scope, $rootScope, $state, $cordovaToast, PPHttp, Push, Unread) {
+app.controller('loginCtrl', function ($scope, $rootScope, $state, $cordovaToast, $ionicScrollDelegate, PPHttp, Push) {
     $scope.user = {};
 
     $scope.goRegister = function () {
@@ -344,13 +346,99 @@ app.controller('loginCtrl', function ($scope, $rootScope, $state, $cordovaToast,
                 document.addEventListener("jpush.receiveNotification", function(event) {
                     $cordovaToast.showShortCenter(event.aps.alert);
                     console.log("jpush.receiveNotification");
-                    PPHttp.doRefreshAll();
+                    //分析alert内容
+                    var alertContent = event.aps.alert;
+                    var commaIndex = alertContent.indexOf(',');
+                    var colonIndex = alertContent.indexOf(':');
+                    if (commaIndex > -1 && colonIndex > -1)
+                    {
+                        //收到朋友消息提醒
+                        var friendUsername = alertContent.substring(0, commaIndex);
+
+                        if ($rootScope.r_curChatFriendUsername == friendUsername)
+                        {
+                            //在对话中
+                            PPHttp.do(
+                                'p',
+                                'getMsg', {
+                                    token: $rootScope.r_mainInfo.token,
+                                    friendUsername: friendUsername
+                                },
+                                function(data, status){
+                                    $rootScope.r_curChatMsg = data.ppData;
+                                    $ionicScrollDelegate.scrollBottom(true);
+                                }
+                            );
+                        }
+                        else
+                        {
+                            //不在对话中
+                            PPHttp.do(
+                                'p',
+                                'getFriendUnreadCount', {
+                                    token: $rootScope.r_mainInfo.token,
+                                    friendUsername: friendUsername
+                                },
+                                //success
+                                function (data, status) {
+                                    $rootScope.r_mainInfo.unreadMsgCounts[friendUsername] = data.ppData;
+                                }
+                            );
+                        }
+                    }
+                    else
+                    {
+                        PPHttp.doRefreshAll();
+                    }
                 }, false);
 
                 document.addEventListener("jpush.openNotification", function(event) {
                     $cordovaToast.showShortCenter(event.aps.alert);
                     console.log("jpush.openNotification");
-                    PPHttp.doRefreshAll();
+                    //分析alert内容
+                    var alertContent = event.aps.alert;
+                    var commaIndex = alertContent.indexOf(',');
+                    var colonIndex = alertContent.indexOf(':');
+                    if (commaIndex > -1 && colonIndex > -1)
+                    {
+                        //收到朋友消息提醒
+                        var friendUsername = alertContent.substring(0, commaIndex);
+
+                        if ($rootScope.r_curChatFriendUsername == friendUsername)
+                        {
+                            //在对话中
+                            PPHttp.do(
+                                'p',
+                                'getMsg', {
+                                    token: $rootScope.r_mainInfo.token,
+                                    friendUsername: friendUsername
+                                },
+                                function(data, status){
+                                    $rootScope.r_curChatMsg = data.ppData;
+                                    $ionicScrollDelegate.scrollBottom(true);
+                                }
+                            );
+                        }
+                        else
+                        {
+                            //不在对话中
+                            PPHttp.do(
+                                'p',
+                                'getFriendUnreadCount', {
+                                    token: $rootScope.r_mainInfo.token,
+                                    friendUsername: friendUsername
+                                },
+                                //success
+                                function (data, status) {
+                                    $rootScope.r_mainInfo.unreadMsgCounts[friendUsername] = data.ppData;
+                                }
+                            );
+                        }
+                    }
+                    else
+                    {
+                        PPHttp.doRefreshAll();
+                    }
                 }, false);
 
                 //// push notification callback
@@ -378,7 +466,7 @@ app.controller('loginCtrl', function ($scope, $rootScope, $state, $cordovaToast,
                 $cordovaToast.showShortCenter("ppstart");
 
                 $rootScope.r_mainInfo = data.ppData;
-                console.log($rootScope.r_mainInfo);
+                //console.log(data.ppData);
                 window.localStorage['username'] = data.ppData.user.username;
                 window.localStorage['nickname'] = data.ppData.user.nickname;
                 window.localStorage['token'] = data.ppData.token;
@@ -1240,6 +1328,7 @@ app.controller('conditionSpecialCtrl', function($scope, $rootScope, $state, $ion
                 },
                 //success
                 function (data, status) {
+                    PPHttp.doRefreshAll();
                     $ionicHistory.nextViewOptions({
                         disableAnimate: true,
                         disableBack: true,
@@ -1258,11 +1347,25 @@ app.controller('conditionSpecialCtrl', function($scope, $rootScope, $state, $ion
 
 });
 
-app.controller('contactCtrl', function($scope, $rootScope, $state, PPHttp) {
+app.controller('contactCtrl', function($scope, $rootScope, $state, $timeout, $ionicScrollDelegate, PPHttp) {
     $scope.clickChat = function(friend){
         $scope.readFriend(friend);
+        $rootScope.r_curChatFriendUsername = friend.friendUsername;
         $rootScope.r_curChatFriendNickname = friend.friendNickname;
-        $state.go('tab.contact.chat');
+        PPHttp.do(
+            'p',
+            'getMsg', {
+                token: $rootScope.r_mainInfo.token,
+                friendUsername: friend.friendUsername
+            },
+            function(data, status){
+                $rootScope.r_curChatMsg = data.ppData;
+                $state.go('tab.contact.chat');
+                $timeout(function() {
+                    $ionicScrollDelegate.scrollBottom(true, true);
+                }, 300);
+            }
+        );
     }
 
     $scope.readFriend = function(friend){
@@ -1286,6 +1389,90 @@ app.controller('contactCtrl', function($scope, $rootScope, $state, PPHttp) {
             }
         );
     };
+});
+
+app.controller('chatCtrl', function($scope, $rootScope, $state, $stateParams, $timeout, $ionicScrollDelegate, PPHttp) {
+    $scope.data = {};
+    $scope.inputMessage = null;
+    $scope.showTime = false;
+
+    var isIOS = ionic.Platform.isWebView() && ionic.Platform.isIOS();
+
+    $scope.myGoBack = function() {
+        PPHttp.do(
+            'p',
+            'readMsg',
+            {
+                token: $rootScope.r_mainInfo.token,
+                friendUsername: $rootScope.r_curChatFriendUsername
+            },
+            function(data, status)
+            {
+                $rootScope.r_mainInfo.unreadMsgCounts[$rootScope.r_curChatFriendUsername] = 0;
+            }
+        ).finally(
+            function(){
+                $rootScope.r_curChatFriendUsername = null;
+                $rootScope.r_curChatFriendNickname = null;
+                $rootScope.r_curChatMsg = null;
+                $state.go('tab.contact');
+            }
+        );
+    };
+
+    $scope.sendMessage = function() {
+        if (!$scope.inputMessage)
+        {
+            return;
+        }
+
+        PPHttp.do(
+            'p',
+            'sendMsg', {
+                token: $rootScope.r_mainInfo.token,
+                friendUsername: $rootScope.r_curChatFriendUsername,
+                content: $scope.inputMessage
+            },
+            function(data, status){
+                PPHttp.do(
+                    'p',
+                    'getMsg', {
+                        token: $rootScope.r_mainInfo.token,
+                        friendUsername: $rootScope.r_curChatFriendUsername
+                    },
+                    function(data, status){
+                        $rootScope.r_curChatMsg = data.ppData;
+                        $scope.inputMessage = '';
+                        $timeout(function() {
+                            $ionicScrollDelegate.scrollBottom(true, true);
+                        }, 300);
+                    }
+                );
+            }
+        );
+    };
+
+
+    $scope.inputUp = function() {
+        if (isIOS) $scope.data.keyboardHeight = 216;
+        $timeout(function() {
+            $ionicScrollDelegate.scrollBottom(true, true);
+        }, 300);
+    };
+
+    $scope.inputDown = function() {
+        if (isIOS) $scope.data.keyboardHeight = 0;
+        $ionicScrollDelegate.resize();
+    };
+
+    $scope.onSwipeRight = function() {
+        $scope.showTime = false;
+    };
+
+    $scope.onSwipeLeft = function() {
+        $scope.showTime = true;
+    };
+
 });
 
 app.filter("objectIDtoDate", function () {
@@ -1353,10 +1540,11 @@ app.factory('PPHttp', function ($rootScope, $http, $cordovaToast) {
                 .success(
                 function(data, status)
                 {
-                    console.log(data);
                     $rootScope.r_mainInfo.meets = data.ppData.meets;
                     $rootScope.r_mainInfo.friends = data.ppData.friends.main;
                     $rootScope.r_mainInfo.friendPics = data.ppData.friends.pics;
+                    $rootScope.r_mainInfo.unreadMsgCounts = data.ppData.friends.unreadMsgCounts;
+                    console.log( $rootScope.r_mainInfo);
                 }
             )
                 .error(handleErr);
@@ -1395,24 +1583,63 @@ app.factory('Push', function() {
     };
 });
 
-app.factory('Unread', function() {
+// All this does is allow the message
+// to be sent when you tap return
+app.directive('input', function($timeout, $ionicScrollDelegate){
     return {
-        do: function(oldArray, unreadArray) {
-            var oldIdArray = oldArray.map(function(item){
-                return item._id;
+        restrict: 'E',
+        scope: {
+            'returnClose': '=',
+            'onReturn': '&',
+            'onFocus': '&',
+            'onBlur': '&'
+        },
+        link: function(scope, element, attr){
+            element.bind('focus', function(e){
+                if(scope.onFocus){
+                    $timeout(function(){
+                        scope.onFocus();
+                    });
+                }
             });
-            for (var i = 0; i < unreadArray.length; i++)
-            {
-                var tmpIndex = oldIdArray.indexOf(unreadArray[i]._id);
-                if (tmpIndex > -1)
-                {
-                    oldArray[tmpIndex] = unreadArray[i];
+            element.bind('blur', function(e){
+                if(scope.onBlur){
+                    $timeout(function(){
+                        scope.onBlur();
+                    });
                 }
-                else
-                {
-                    oldArray.push(unreadArray[i]);
+            });
+            element.bind('keydown', function(e){
+                if(e.which == 13){
+                    if(scope.returnClose) element[0].blur();
+                    if(scope.onReturn){
+                        $timeout(function(){
+                            scope.onReturn();
+                        });
+                    }
                 }
-            }
+            });
         }
-    };
+    }
 });
+//app.factory('Unread', function() {
+//    return {
+//        do: function(oldArray, unreadArray) {
+//            var oldIdArray = oldArray.map(function(item){
+//                return item._id;
+//            });
+//            for (var i = 0; i < unreadArray.length; i++)
+//            {
+//                var tmpIndex = oldIdArray.indexOf(unreadArray[i]._id);
+//                if (tmpIndex > -1)
+//                {
+//                    oldArray[tmpIndex] = unreadArray[i];
+//                }
+//                else
+//                {
+//                    oldArray.push(unreadArray[i]);
+//                }
+//            }
+//        }
+//    };
+//});

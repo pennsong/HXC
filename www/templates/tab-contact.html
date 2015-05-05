@@ -10,6 +10,7 @@
             <a class="item item-avatar-left" ng-class="{unread:item.unread}" href="#" ng-repeat="item in r_mainInfo.friends" ng-click="clickChat(item)">
                 <img ng-src="{{r_imagePath + 'normal/' + r_mainInfo.friendPics[item.friendUsername]}}">
                 <h2>{{item.friendNickname}}</h2>
+                <span class="badge badge-assertive" ng-show="r_mainInfo.unreadMsgCounts[item.friendUsername] > 0">{{r_mainInfo.unreadMsgCounts[item.friendUsername]}}</span>
             </a>
         </div>
     </ion-content>
