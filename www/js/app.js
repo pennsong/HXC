@@ -11,9 +11,9 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
         $ionicPlatform.ready(function () {
             // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
             // for form inputs)
-            $rootScope.r_serverRoot = "http://192.168.43.30:3000/";
-            //$rootScope.r_serverRoot = "http://218.79.184.235:3000/";
-            //$rootScope.r_serverRoot = "http://localhost:3000/";
+            //$rootScope.r_serverRoot = "http://192.168.43.30:3000/";
+            $rootScope.r_serverRoot = "https://pphx.herokuapp.com/";
+            //$rootScope.r_serverRoot = "http://192.168.77.158:5000/";
             $rootScope.r_infoNeedUpdateTime = 0;
 
             $rootScope.r_curMeet = null;
