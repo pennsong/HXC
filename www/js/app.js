@@ -1112,6 +1112,69 @@ app.controller('profileCtrl', function ($scope, $rootScope, $state, $ionicHistor
             template: '退出中...'
         });
 
+        //清空当前$root数据, 取消jpush alias
+        Push.setAlias("");
+        $rootScope.r_infoNeedUpdateTime = 0;
+
+        $rootScope.r_curMeet = null;
+
+        $rootScope.r_curChatFriendUsername = null;
+        $rootScope.r_curChatFriendNickname = null;
+        $rootScope.r_curChatMsg = null;
+
+        $rootScope.r_searchMode = null;
+
+        $rootScope.r_curOptions = [];
+        $rootScope.r_curOptionName = null;
+
+        $rootScope.r_mainInfo = null;
+
+        $rootScope.r_imagePath = $rootScope.r_serverRoot + 'images/';
+        $rootScope.r_sysImagePath = $rootScope.r_serverRoot + 'images/system/';
+
+        $rootScope.r_curOptions = [];
+        $rootScope.r_curOptionName = null;
+
+        $rootScope.r_myLocation = {
+            lng: null,
+            lat: null
+        }
+
+        $rootScope.r_myInfo = {
+            "specialInfo": {
+                "sex": null,
+                "clothesColor": null,
+                "clothesStyle": null,
+                "clothesType": null,
+                "glasses": null,
+                "hair": null
+            },
+            specialPic: null,
+            specialPicDisplay: null
+        }
+
+        $rootScope.r_meetCondition = {
+            mapLoc: {
+                uid: '',
+                name: '',
+                address: ''
+            },
+            specialInfo: {
+                sex: '',
+                clothesColor: '',
+                clothesStyle: '',
+                clothesType: '',
+                glasses: '',
+                hair: ''
+            }
+        };
+
+        $rootScope.r_oldSpecial = {};
+
+        $rootScope.r_meetTargetUpdated = {};
+
+        $rootScope.r_targets = [];
+
         $state.go('login');
         $timeout(function () {
             window.location.reload();
