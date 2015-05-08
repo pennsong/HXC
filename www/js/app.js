@@ -674,12 +674,12 @@ app.controller('meetCtrl', function ($scope, $rootScope, $state, $ionicModal, $i
             $rootScope.r_mainInfo.user.specialPic = null;
         } else {
             $rootScope.r_oldSpecial = {
-                hair = $rootScope.r_mainInfo.user.specialInfo.hair;
-                glasses = $rootScope.r_mainInfo.user.specialInfo.glasses;
-                clothesType = $rootScope.r_mainInfo.user.specialInfo.clothesStyle;
-                clothesColor = $rootScope.r_mainInfo.user.specialInfo.clothesColor;
-                clothesStyle = $rootScope.r_mainInfo.user.specialInfo.clothesStyle;
-                specialPic = $rootScope.r_mainInfo.user.specialPic;
+                hair : $rootScope.r_mainInfo.user.specialInfo.hair,
+                glasses : $rootScope.r_mainInfo.user.specialInfo.glasses,
+                clothesType : $rootScope.r_mainInfo.user.specialInfo.clothesStyle,
+                clothesColor : $rootScope.r_mainInfo.user.specialInfo.clothesColor,
+                clothesStyle : $rootScope.r_mainInfo.user.specialInfo.clothesStyle,
+                specialPic : $rootScope.r_mainInfo.user.specialPic
             };
 
         }
