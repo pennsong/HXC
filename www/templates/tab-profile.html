@@ -9,6 +9,9 @@
         <button class="button button-full button-positive" ng-click="getCurMapPosition()">
             查看最新位置信息
         </button>
+        <button class="button button-full button-positive" ng-click="test()">
+            test
+        </button>
         <div class="item item-image" ng-if="lastLocationTime">
             <img src="http://api.map.baidu.com/staticimage?center={{bLng}},{{bLat}}&width=400&height=300&zoom=17&markers={{bLng}},{{bLat}}">
         </div>

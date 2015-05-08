@@ -69,7 +69,7 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
             }
         };
 
-        $rootScope.r_oldSpecial = null;
+        $rootScope.r_oldSpecial = {};
 
         $rootScope.r_meetTargetUpdated = {};
 
@@ -656,12 +656,10 @@ app.controller('meetCtrl', function ($scope, $rootScope, $state, $ionicModal, $i
     };
 
     $scope.enterInfo = function () {
-	console.log($rootScope.r_mainInfo.user.specialInfo);
         if (!($rootScope.r_mainInfo.user.specialInfoTime &&
-                moment()
+                moment($rootScope.r_mainInfo.user.specialInfoTime)
                 .startOf('day')
-                .add(-8, 'hours')
-                .isBefore($rootScope.r_mainInfo.user.specialInfoTime)
+                .isBefore(moment($rootScope.r_mainInfo.user.specialInfoTime))
             )) {
             //console.log($rootScope.r_mainInfo.user.specialInfoTime);
             //console.log(moment().startOf('day').add(4, 'hours').isBefore($rootScope.r_mainInfo.user.specialInfoTime));
@@ -676,7 +674,7 @@ app.controller('meetCtrl', function ($scope, $rootScope, $state, $ionicModal, $i
             $rootScope.r_oldSpecial = {
                 hair : $rootScope.r_mainInfo.user.specialInfo.hair,
                 glasses : $rootScope.r_mainInfo.user.specialInfo.glasses,
-                clothesType : $rootScope.r_mainInfo.user.specialInfo.clothesStyle,
+                clothesType : $rootScope.r_mainInfo.user.specialInfo.clothesType,
                 clothesColor : $rootScope.r_mainInfo.user.specialInfo.clothesColor,
                 clothesStyle : $rootScope.r_mainInfo.user.specialInfo.clothesStyle,
                 specialPic : $rootScope.r_mainInfo.user.specialPic
@@ -939,8 +937,8 @@ app.controller('meetInfoCtrl', function ($scope, $rootScope, $state, $ionicModal
                 },
                 function (data, status) {
                     if (data.ppResult == 'ok') {
+                        $rootScope.r_mainInfo.user.specialInfoTime = data.ppData;
                         $state.go('tab.meet');
-			console.log($rootScope.r_mainInfo.user.specialInfo);
                     }
                 }
             )
@@ -1065,6 +1063,10 @@ app.controller('meetInfoCtrl', function ($scope, $rootScope, $state, $ionicModal
 });
 
 app.controller('profileCtrl', function ($scope, $rootScope, $state, $ionicHistory, $timeout, $ionicLoading, $http, $cordovaToast, PPHttp) {
+    $scope.test = function(){
+        console.log($rootScope.r_oldSpecial);
+        console.log($rootScope.r_mainInfo.user);
+    };
 
     $scope.getCurMapPosition = function () {
         PPHttp.do(
