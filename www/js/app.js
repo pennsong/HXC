@@ -7,148 +7,148 @@
 // 'starter.controllers' is found in controllers.js
 var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
 
-.run(function ($ionicPlatform, $cordovaDevice, $cordovaKeyboard, $cordovaToast, $rootScope, PPHttp) {
-    $ionicPlatform.ready(function () {
-        // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
-        // for form inputs)
-        //$rootScope.r_serverRoot = "http://192.168.43.30:3000/";
-        $rootScope.r_serverRoot = "https://pphx.herokuapp.com/";
-        //$rootScope.r_serverRoot = "http://192.168.77.158:5000/";
-        $rootScope.r_infoNeedUpdateTime = 0;
+    .run(function ($ionicPlatform, $cordovaDevice, $cordovaKeyboard, $cordovaToast, $rootScope, PPHttp) {
+        $ionicPlatform.ready(function () {
+            // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
+            // for form inputs)
+            //$rootScope.r_serverRoot = "http://192.168.43.30:3000/";
+            $rootScope.r_serverRoot = "https://pphx.herokuapp.com/";
+            //$rootScope.r_serverRoot = "http://192.168.77.158:5000/";
+            $rootScope.r_infoNeedUpdateTime = 0;
 
-        $rootScope.r_curMeet = null;
+            $rootScope.r_curMeet = null;
 
-        $rootScope.r_curChatFriendUsername = null;
-        $rootScope.r_curChatFriendNickname = null;
-        $rootScope.r_curChatMsg = null;
+            $rootScope.r_curChatFriendUsername = null;
+            $rootScope.r_curChatFriendNickname = null;
+            $rootScope.r_curChatMsg = null;
 
-        $rootScope.r_searchMode = null;
+            $rootScope.r_searchMode = null;
 
-        $rootScope.r_curOptions = [];
-        $rootScope.r_curOptionName = null;
+            $rootScope.r_curOptions = [];
+            $rootScope.r_curOptionName = null;
 
-        $rootScope.r_mainInfo = null;
+            $rootScope.r_mainInfo = null;
 
-        $rootScope.r_imagePath = $rootScope.r_serverRoot + 'images/';
-        $rootScope.r_sysImagePath = $rootScope.r_serverRoot + 'images/system/';
+            $rootScope.r_imagePath = $rootScope.r_serverRoot + 'images/';
+            $rootScope.r_sysImagePath = $rootScope.r_serverRoot + 'images/system/';
 
-        $rootScope.r_curOptions = [];
-        $rootScope.r_curOptionName = null;
+            $rootScope.r_curOptions = [];
+            $rootScope.r_curOptionName = null;
 
-        $rootScope.r_myLocation = {
-            lng: null,
-            lat: null
-        }
-
-        $rootScope.r_myInfo = {
-            "specialInfo": {
-                "sex": null,
-                "clothesColor": null,
-                "clothesStyle": null,
-                "clothesType": null,
-                "glasses": null,
-                "hair": null
-            },
-            specialPic: null,
-            specialPicDisplay: null
-        }
-
-        $rootScope.r_meetCondition = {
-            mapLoc: {
-                uid: '',
-                name: '',
-                address: ''
-            },
-            specialInfo: {
-                sex: '',
-                clothesColor: '',
-                clothesStyle: '',
-                clothesType: '',
-                glasses: '',
-                hair: ''
+            $rootScope.r_myLocation = {
+                lng: null,
+                lat: null
             }
-        };
 
-        $rootScope.r_oldSpecial = {};
+            $rootScope.r_myInfo = {
+                "specialInfo": {
+                    "sex": null,
+                    "clothesColor": null,
+                    "clothesStyle": null,
+                    "clothesType": null,
+                    "glasses": null,
+                    "hair": null
+                },
+                specialPic: null,
+                specialPicDisplay: null
+            }
 
-        $rootScope.r_meetTargetUpdated = {};
+            $rootScope.r_meetCondition = {
+                mapLoc: {
+                    uid: '',
+                    name: '',
+                    address: ''
+                },
+                specialInfo: {
+                    sex: '',
+                    clothesColor: '',
+                    clothesStyle: '',
+                    clothesType: '',
+                    glasses: '',
+                    hair: ''
+                }
+            };
 
-        $rootScope.r_targets = [];
+            $rootScope.r_oldSpecial = {};
 
-        $rootScope.r_sex = [
-            "男",
-            "女"
-        ];
+            $rootScope.r_meetTargetUpdated = {};
 
-        $rootScope.r_hair = [
-            "竖起",
-            "躺下",
-            "辫子/盘发",
-            "短发(齐肩,不过肩)",
-            "长发(过肩)",
-            "戴帽子"
-        ];
+            $rootScope.r_targets = [];
 
-        $rootScope.r_glasses = [
-            "带",
-            "无" //"不带"
-        ];
+            $rootScope.r_sex = [
+                "男",
+                "女"
+            ];
 
-        $rootScope.r_clothesType = [
-            "大衣", //"风衣/大衣/夹克",
-            "西装/套装",
-            "运动外套/卫衣",
-            "T恤长袖",
-            "T恤短袖",
-            "马甲/背心",
-            "长袖衬衫",
-            "短袖衬衫",
-            "毛衣/羊毛绒/线衫/针织"
-        ];
+            $rootScope.r_hair = [
+                "竖起",
+                "躺下",
+                "辫子/盘发",
+                "短发(齐肩,不过肩)",
+                "长发(过肩)",
+                "戴帽子"
+            ];
 
-        $rootScope.r_clothesColor = [
-            "红/紫/粉",
-            "黄",
-            "蓝/绿",
-            "白",
-            "黑",
-            "灰",
-            "无法分辨主要颜色"
-        ];
+            $rootScope.r_glasses = [
+                "带",
+                "无" //"不带"
+            ];
 
-        $rootScope.r_clothesStyle = [
-            "纯色",
-            "线条/格子/色块",
-            "图案(抽象,卡通,画等)"
-        ];
+            $rootScope.r_clothesType = [
+                "大衣", //"风衣/大衣/夹克",
+                "西装/套装",
+                "运动外套/卫衣",
+                "T恤长袖",
+                "T恤短袖",
+                "马甲/背心",
+                "长袖衬衫",
+                "短袖衬衫",
+                "毛衣/羊毛绒/线衫/针织"
+            ];
+
+            $rootScope.r_clothesColor = [
+                "红/紫/粉",
+                "黄",
+                "蓝/绿",
+                "白",
+                "黑",
+                "灰",
+                "无法分辨主要颜色"
+            ];
+
+            $rootScope.r_clothesStyle = [
+                "纯色",
+                "线条/格子/色块",
+                "图案(抽象,卡通,画等)"
+            ];
 
 
-        if (window.cordova && window.cordova.plugins.Keyboard) {
-            cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
-            cordova.plugins.Keyboard.disableScroll(true);
-        }
-        if (window.StatusBar) {
-            // org.apache.cordova.statusbar required
-            StatusBar.styleLightContent();
-        }
+            if (window.cordova && window.cordova.plugins.Keyboard) {
+                cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
+                cordova.plugins.Keyboard.disableScroll(true);
+            }
+            if (window.StatusBar) {
+                // org.apache.cordova.statusbar required
+                StatusBar.styleLightContent();
+            }
 
-        window.navigator.geolocation.getCurrentPosition(function (location) {
-            //console.log('Location from Phonegap');
-        });
+            window.navigator.geolocation.getCurrentPosition(function (location) {
+                //console.log('Location from Phonegap');
+            });
 
-        $rootScope.r_bgGeo = window.plugins.backgroundGeoLocation;
+            $rootScope.r_bgGeo = window.plugins.backgroundGeoLocation;
 
-        var yourAjaxCallback = function (location) {
-            //alert('1[js] BackgroundGeoLocation callback:  ' + location.latitude + ',' + location.longitude);
-            ////
-            // IMPORTANT:  You must execute the #finish method here to inform the native plugin that you're finished,
-            //  and the background-task may be completed.  You must do this regardless if your HTTP request is successful or not.
-            // IF YOU DON'T, ios will CRASH YOUR APP for spending too much time in the background.
-            //
-            //
-            //console.log('===============');
-            //console.log(location);
-            PPHttp.do(
+            var yourAjaxCallback = function (location) {
+                //alert('1[js] BackgroundGeoLocation callback:  ' + location.latitude + ',' + location.longitude);
+                ////
+                // IMPORTANT:  You must execute the #finish method here to inform the native plugin that you're finished,
+                //  and the background-task may be completed.  You must do this regardless if your HTTP request is successful or not.
+                // IF YOU DON'T, ios will CRASH YOUR APP for spending too much time in the background.
+                //
+                //
+                //console.log('===============');
+                //console.log(location);
+                PPHttp.do(
                     'p',
                     'updateLocation', {
                         lng: location.longitude,
@@ -163,156 +163,156 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
                         //console.log(data.ppData);
                     }
                 )
-                .finally(
+                    .finally(
                     function () {
                         $rootScope.r_bgGeo.finish();
                     }
                 );
-        };
+            };
 
 
-        var callbackFn = function (location) {
-            //console.log('[js] BackgroundGeoLocation callback:  ' + location.latitude + ',' + location.longitude);
-            //$rootScope.r_lastLocation = {
-            //    lng: location.longitude,
-            //    lat: location.latitude
-            //};
+            var callbackFn = function (location) {
+                //console.log('[js] BackgroundGeoLocation callback:  ' + location.latitude + ',' + location.longitude);
+                //$rootScope.r_lastLocation = {
+                //    lng: location.longitude,
+                //    lat: location.latitude
+                //};
 
-            //console.log(location);
-            //$cordovaToast.showShortCenter('a:' + '[js] BackgroundGeoLocation callback:  ' + location.latitude + ',' + location.longitude);
-            // Do your HTTP request here to POST location to your server.
-            //
-            //
-            //alert('2[js] BackgroundGeoLocation callback:  ' + location.latitude + ',' + location.longitude);
-            $cordovaToast.showShortCenter('callback');
-            //console.log('---------------------------');
-            //console.log(location);
-            yourAjaxCallback.call(this, location);
-        };
+                //console.log(location);
+                //$cordovaToast.showShortCenter('a:' + '[js] BackgroundGeoLocation callback:  ' + location.latitude + ',' + location.longitude);
+                // Do your HTTP request here to POST location to your server.
+                //
+                //
+                //alert('2[js] BackgroundGeoLocation callback:  ' + location.latitude + ',' + location.longitude);
+                $cordovaToast.showShortCenter('callback');
+                //console.log('---------------------------');
+                //console.log(location);
+                yourAjaxCallback.call(this, location);
+            };
 
-        var failureFn = function (error) {
-            $cordovaToast.showShortCenter(error);
-            //console.log(error);
-            //$cordovaToast.showShortCenter('e:' + error);
-            //alert('BackgroundGeoLocation error');
-        }
+            var failureFn = function (error) {
+                $cordovaToast.showShortCenter(error);
+                //console.log(error);
+                //$cordovaToast.showShortCenter('e:' + error);
+                //alert('BackgroundGeoLocation error');
+            }
 
-        $rootScope.r_bgGeo.configure(callbackFn, failureFn, {
-            //url: $rootScope.r_serverRoot + "users/updateLocation", // <-- Android ONLY:  your server url to send locations to
-            //url: "http://192.168.1.15:3000/users/updateLocation",
-            //params: {
-            //    //auth_token: 'user_secret_auth_token',    //  <-- Android ONLY:  HTTP POST params sent to your server when persisting locations.
-            //    //foo: 'bar'                              //  <-- Android ONLY:  HTTP POST params sent to your server when persisting locations.
-            //    token: $rootScope.r_mainInfo.token
-            //},
-            // 			headers: {                                   // <-- Android ONLY:  Optional HTTP headers sent to your configured #url when persisting locations
-            // 				"X-Foo": "BAR"
-            // 			},
-            desiredAccuracy: 5,
-            stationaryRadius: 5,
-            distanceFilter: 5,
-            notificationTitle: 'Background tracking', // <-- android only, customize the title of the notification
-            notificationText: 'ENABLED', // <-- android only, customize the text of the notification
-            activityType: 'AutomotiveNavigation',
-            debug: false, // <-- enable this hear sounds for background-geolocation life-cycle.
-            stopOnTerminate: false // <-- enable this to clear background location settings when the app terminates
+            $rootScope.r_bgGeo.configure(callbackFn, failureFn, {
+                //url: $rootScope.r_serverRoot + "users/updateLocation", // <-- Android ONLY:  your server url to send locations to
+                //url: "http://192.168.1.15:3000/users/updateLocation",
+                //params: {
+                //    //auth_token: 'user_secret_auth_token',    //  <-- Android ONLY:  HTTP POST params sent to your server when persisting locations.
+                //    //foo: 'bar'                              //  <-- Android ONLY:  HTTP POST params sent to your server when persisting locations.
+                //    token: $rootScope.r_mainInfo.token
+                //},
+                // 			headers: {                                   // <-- Android ONLY:  Optional HTTP headers sent to your configured #url when persisting locations
+                // 				"X-Foo": "BAR"
+                // 			},
+                desiredAccuracy: 5,
+                stationaryRadius: 5,
+                distanceFilter: 5,
+                notificationTitle: 'Background tracking', // <-- android only, customize the title of the notification
+                notificationText: 'ENABLED', // <-- android only, customize the text of the notification
+                activityType: 'AutomotiveNavigation',
+                debug: false, // <-- enable this hear sounds for background-geolocation life-cycle.
+                stopOnTerminate: false // <-- enable this to clear background location settings when the app terminates
+            });
         });
+    })
+
+    .config(function ($stateProvider, $urlRouterProvider) {
+
+        $urlRouterProvider.otherwise('/login');
+
+        $stateProvider
+            .state('login', {
+                url: '/login',
+                templateUrl: 'templates/login.html',
+                controller: 'loginCtrl'
+            })
+            .state('register', {
+                url: '/register',
+                templateUrl: 'templates/register.html',
+                controller: 'registerCtrl'
+            })
+            .state('tab', {
+                url: '/tab',
+                abstract: true,
+                templateUrl: 'templates/tab.html'
+            })
+            .state('tab.meet', {
+                url: '/meet',
+                views: {
+                    'meet': {
+                        templateUrl: 'templates/tab-meet.html',
+                        controller: 'meetCtrl'
+                    }
+                }
+            })
+            .state('tab.contact', {
+                url: '/contact',
+                views: {
+                    'contact': {
+                        templateUrl: 'templates/tab-contact.html',
+                        controller: 'contactCtrl'
+                    }
+                }
+            })
+            .state('tab.meet.info', {
+                url: '/info',
+                views: {
+                    'meet@tab': {
+                        templateUrl: 'templates/meet-info.html',
+                        controller: 'meetInfoCtrl'
+                    }
+                }
+            })
+            .state('tab.profile', {
+                url: '/profile',
+                views: {
+                    'profile': {
+                        templateUrl: 'templates/tab-profile.html',
+                        controller: 'profileCtrl'
+                    }
+                }
+            })
+            .state('tab.contact.chat', {
+                url: '/chat/{meetId}',
+                views: {
+                    'contact@tab': {
+                        templateUrl: 'templates/contact-chat.html',
+                        controller: 'chatCtrl'
+                    }
+                }
+            })
+            .state('tab.meet.condition', {
+                url: '/condition',
+                views: {
+                    'meet@tab': {
+                        templateUrl: 'templates/meet-condition.html',
+                        controller: 'meetConditionCtrl'
+                    }
+                }
+            })
+            .state('tab.meet.condition.specialPic', {
+                url: '/specialPic',
+                views: {
+                    'meet@tab': {
+                        templateUrl: 'templates/condition-specialPic.html',
+                        controller: 'conditionSpecialCtrl'
+                    }
+                }
+            })
+            .state('tab.meet.detail', {
+                url: '/detail/{meetId}',
+                views: {
+                    'meet@tab': {
+                        templateUrl: 'templates/meetDetail.html',
+                        controller: 'meetDetailCtrl'
+                    }
+                }
+            });
     });
-})
-
-.config(function ($stateProvider, $urlRouterProvider) {
-
-    $urlRouterProvider.otherwise('/login');
-
-    $stateProvider
-        .state('login', {
-            url: '/login',
-            templateUrl: 'templates/login.html',
-            controller: 'loginCtrl'
-        })
-        .state('register', {
-            url: '/register',
-            templateUrl: 'templates/register.html',
-            controller: 'registerCtrl'
-        })
-        .state('tab', {
-            url: '/tab',
-            abstract: true,
-            templateUrl: 'templates/tab.html'
-        })
-        .state('tab.meet', {
-            url: '/meet',
-            views: {
-                'meet': {
-                    templateUrl: 'templates/tab-meet.html',
-                    controller: 'meetCtrl'
-                }
-            }
-        })
-        .state('tab.contact', {
-            url: '/contact',
-            views: {
-                'contact': {
-                    templateUrl: 'templates/tab-contact.html',
-                    controller: 'contactCtrl'
-                }
-            }
-        })
-        .state('tab.meet.info', {
-            url: '/info',
-            views: {
-                'meet@tab': {
-                    templateUrl: 'templates/meet-info.html',
-                    controller: 'meetInfoCtrl'
-                }
-            }
-        })
-        .state('tab.profile', {
-            url: '/profile',
-            views: {
-                'profile': {
-                    templateUrl: 'templates/tab-profile.html',
-                    controller: 'profileCtrl'
-                }
-            }
-        })
-        .state('tab.contact.chat', {
-            url: '/chat/{meetId}',
-            views: {
-                'contact@tab': {
-                    templateUrl: 'templates/contact-chat.html',
-                    controller: 'chatCtrl'
-                }
-            }
-        })
-        .state('tab.meet.condition', {
-            url: '/condition',
-            views: {
-                'meet@tab': {
-                    templateUrl: 'templates/meet-condition.html',
-                    controller: 'meetConditionCtrl'
-                }
-            }
-        })
-        .state('tab.meet.condition.specialPic', {
-            url: '/specialPic',
-            views: {
-                'meet@tab': {
-                    templateUrl: 'templates/condition-specialPic.html',
-                    controller: 'conditionSpecialCtrl'
-                }
-            }
-        })
-        .state('tab.meet.detail', {
-            url: '/detail/{meetId}',
-            views: {
-                'meet@tab': {
-                    templateUrl: 'templates/meetDetail.html',
-                    controller: 'meetDetailCtrl'
-                }
-            }
-        });
-});
 
 app.controller('loginCtrl', function ($scope, $rootScope, $state, $cordovaToast, $ionicScrollDelegate, PPHttp, Push) {
     $scope.user = {};
@@ -450,7 +450,10 @@ app.controller('loginCtrl', function ($scope, $rootScope, $state, $cordovaToast,
                 //};
 
                 Push.init();
-                Push.setAlias(data.ppData.user.username);
+                Push.setAlias(data.ppData.user.username, function(result){
+                    console.log('aaaaa');
+                    console.log(result);
+                });
 
                 $rootScope.r_bgGeo.start();
                 $cordovaToast.showShortCenter("ppstart");
@@ -609,11 +612,11 @@ app.controller('meetCtrl', function ($scope, $rootScope, $state, $ionicModal, $i
         PPHttp
             .doRefreshAll()
             .finally(
-                function () {
-                    $scope.$broadcast('scroll.refreshComplete');
-                    //$scope.$apply();
-                }
-            );
+            function () {
+                $scope.$broadcast('scroll.refreshComplete');
+                //$scope.$apply();
+            }
+        );
     };
 
     $scope.createMeet = function () {
@@ -622,42 +625,42 @@ app.controller('meetCtrl', function ($scope, $rootScope, $state, $ionicModal, $i
             template: 'Loading...'
         });
         PPHttp.do(
-                'p',
-                'sendMeetCheck', {
-                    token: $rootScope.r_mainInfo.token
-                },
-                function (data, status) {
-                    if (data.ppResult == 'ok') {
-                        $rootScope.r_searchMode = '新建';
-                        $rootScope.r_meetCondition = {
-                            mapLoc: {
-                                uid: null,
-                                name: null,
-                                address: null
-                            },
-                            specialInfo: {
-                                sex: null,
-                                clothesColor: null,
-                                clothesStyle: null,
-                                clothesType: null,
-                                glasses: null,
-                                hair: null
-                            }
-                        };
-                        $state.go('tab.meet.condition');
-                    }
+            'p',
+            'sendMeetCheck', {
+                token: $rootScope.r_mainInfo.token
+            },
+            function (data, status) {
+                if (data.ppResult == 'ok') {
+                    $rootScope.r_searchMode = '新建';
+                    $rootScope.r_meetCondition = {
+                        mapLoc: {
+                            uid: null,
+                            name: null,
+                            address: null
+                        },
+                        specialInfo: {
+                            sex: null,
+                            clothesColor: null,
+                            clothesStyle: null,
+                            clothesType: null,
+                            glasses: null,
+                            hair: null
+                        }
+                    };
+                    $state.go('tab.meet.condition');
                 }
-            )
+            }
+        )
             .finally(
-                function () {
-                    $ionicLoading.hide();
-                }
-            );
+            function () {
+                $ionicLoading.hide();
+            }
+        );
     };
 
     $scope.enterInfo = function () {
         if (!($rootScope.r_mainInfo.user.specialInfoTime &&
-                moment($rootScope.r_mainInfo.user.specialInfoTime)
+            moment($rootScope.r_mainInfo.user.specialInfoTime)
                 .startOf('day')
                 .isBefore(moment($rootScope.r_mainInfo.user.specialInfoTime))
             )) {
@@ -692,7 +695,7 @@ app.controller('meetConditionCtrl', function ($scope, $rootScope, $state, $ionic
 
     $scope.searchTargets = function () {
         if (!(
-                $rootScope.r_meetCondition.specialInfo.sex && $rootScope.r_meetCondition.specialInfo.clothesColor && $rootScope.r_meetCondition.specialInfo.clothesStyle && $rootScope.r_meetCondition.specialInfo.clothesType && $rootScope.r_meetCondition.specialInfo.glasses && $rootScope.r_meetCondition.specialInfo.hair && $rootScope.r_meetCondition.mapLoc.uid
+            $rootScope.r_meetCondition.specialInfo.sex && $rootScope.r_meetCondition.specialInfo.clothesColor && $rootScope.r_meetCondition.specialInfo.clothesStyle && $rootScope.r_meetCondition.specialInfo.clothesType && $rootScope.r_meetCondition.specialInfo.glasses && $rootScope.r_meetCondition.specialInfo.hair && $rootScope.r_meetCondition.mapLoc.uid
             )) {
             $cordovaToast.showShortCenter('请把条件填写完整');
             return;
@@ -706,58 +709,58 @@ app.controller('meetConditionCtrl', function ($scope, $rootScope, $state, $ionic
         });
         if ($rootScope.r_searchMode == '回复') {
             PPHttp.do(
-                    'p',
-                    'replyMeetSearchTarget', {
-                        token: $rootScope.r_mainInfo.token,
-                        sex: $rootScope.r_meetCondition.specialInfo.sex,
-                        hair: $rootScope.r_meetCondition.specialInfo.hair,
-                        glasses: $rootScope.r_meetCondition.specialInfo.glasses,
-                        clothesType: $rootScope.r_meetCondition.specialInfo.clothesType,
-                        clothesColor: $rootScope.r_meetCondition.specialInfo.clothesColor,
-                        clothesStyle: $rootScope.r_meetCondition.specialInfo.clothesStyle,
-                        meetId: $rootScope.r_curMeet._id
-                    },
-                    function (data, status) {
-                        if (data.ppResult == 'ok') {
-                            if (!data.ppData) {
-                                //特征信息不匹配
-                                $cordovaToast.showShortCenter(data.ppMsg);
-                            } else {
-                                $rootScope.r_targets = data.ppData;
-                                $state.go('tab.meet.condition.specialPic');
-                            }
-                        }
-                    }
-                )
-                .finally(
-                    function () {
-                        $ionicLoading.hide();
-                    }
-                );
-        } else {
-            PPHttp.do(
-                    'p',
-                    'createMeetSearchTarget', {
-                        token: $rootScope.r_mainInfo.token,
-                        sex: $rootScope.r_meetCondition.specialInfo.sex,
-                        hair: $rootScope.r_meetCondition.specialInfo.hair,
-                        glasses: $rootScope.r_meetCondition.specialInfo.glasses,
-                        clothesType: $rootScope.r_meetCondition.specialInfo.clothesType,
-                        clothesColor: $rootScope.r_meetCondition.specialInfo.clothesColor,
-                        clothesStyle: $rootScope.r_meetCondition.specialInfo.clothesStyle
-                    },
-                    function (data, status) {
-                        if (data.ppResult == 'ok') {
+                'p',
+                'replyMeetSearchTarget', {
+                    token: $rootScope.r_mainInfo.token,
+                    sex: $rootScope.r_meetCondition.specialInfo.sex,
+                    hair: $rootScope.r_meetCondition.specialInfo.hair,
+                    glasses: $rootScope.r_meetCondition.specialInfo.glasses,
+                    clothesType: $rootScope.r_meetCondition.specialInfo.clothesType,
+                    clothesColor: $rootScope.r_meetCondition.specialInfo.clothesColor,
+                    clothesStyle: $rootScope.r_meetCondition.specialInfo.clothesStyle,
+                    meetId: $rootScope.r_curMeet._id
+                },
+                function (data, status) {
+                    if (data.ppResult == 'ok') {
+                        if (!data.ppData) {
+                            //特征信息不匹配
+                            $cordovaToast.showShortCenter(data.ppMsg);
+                        } else {
                             $rootScope.r_targets = data.ppData;
                             $state.go('tab.meet.condition.specialPic');
                         }
                     }
-                )
+                }
+            )
                 .finally(
-                    function () {
-                        $ionicLoading.hide();
+                function () {
+                    $ionicLoading.hide();
+                }
+            );
+        } else {
+            PPHttp.do(
+                'p',
+                'createMeetSearchTarget', {
+                    token: $rootScope.r_mainInfo.token,
+                    sex: $rootScope.r_meetCondition.specialInfo.sex,
+                    hair: $rootScope.r_meetCondition.specialInfo.hair,
+                    glasses: $rootScope.r_meetCondition.specialInfo.glasses,
+                    clothesType: $rootScope.r_meetCondition.specialInfo.clothesType,
+                    clothesColor: $rootScope.r_meetCondition.specialInfo.clothesColor,
+                    clothesStyle: $rootScope.r_meetCondition.specialInfo.clothesStyle
+                },
+                function (data, status) {
+                    if (data.ppResult == 'ok') {
+                        $rootScope.r_targets = data.ppData;
+                        $state.go('tab.meet.condition.specialPic');
                     }
-                );
+                }
+            )
+                .finally(
+                function () {
+                    $ionicLoading.hide();
+                }
+            );
         }
     };
 
@@ -800,7 +803,7 @@ app.controller('meetConditionCtrl', function ($scope, $rootScope, $state, $ionic
 
         $http.jsonp("http://api.map.baidu.com/place/v2/search?callback=JSON_CALLBACK&" + data)
             .
-        success(function (data, status, headers, config) {
+            success(function (data, status, headers, config) {
                 //查询结果
                 $rootScope.r_curOptions = data.results;
             })
@@ -828,7 +831,7 @@ app.controller('meetConditionCtrl', function ($scope, $rootScope, $state, $ionic
             }
             $http.jsonp("http://api.map.baidu.com/geoconv/v1/?callback=JSON_CALLBACK&ak=MgBALVVeCd8THVBi6gPdvsvG&coords=" + $rootScope.r_mainInfo.user.lastLocation[0] + "," + $rootScope.r_mainInfo.user.lastLocation[1])
                 .
-            success(function (data, status, headers, config) {
+                success(function (data, status, headers, config) {
                     //转换为百度坐标
                     $scope.bLng = data.result[0].x;
                     $scope.bLat = data.result[0].y;
@@ -844,25 +847,25 @@ app.controller('meetConditionCtrl', function ($scope, $rootScope, $state, $ionic
         }
 
         switch (item) {
-        case "性别":
-            $rootScope.r_curOptions = $rootScope.r_sex;
-            break;
-        case "发型":
-            $rootScope.r_curOptions = $rootScope.r_hair;
-            break;
-        case "眼镜":
-            $rootScope.r_curOptions = $rootScope.r_glasses;
-            break;
-        case "衣服类型":
-            $rootScope.r_curOptions = $rootScope.r_clothesType;
-            break;
-        case "衣服颜色":
-            $rootScope.r_curOptions = $rootScope.r_clothesColor;
-            break;
-        case "衣服花纹":
-            $rootScope.r_curOptions = $rootScope.r_clothesStyle;
-            break;
-        default:
+            case "性别":
+                $rootScope.r_curOptions = $rootScope.r_sex;
+                break;
+            case "发型":
+                $rootScope.r_curOptions = $rootScope.r_hair;
+                break;
+            case "眼镜":
+                $rootScope.r_curOptions = $rootScope.r_glasses;
+                break;
+            case "衣服类型":
+                $rootScope.r_curOptions = $rootScope.r_clothesType;
+                break;
+            case "衣服颜色":
+                $rootScope.r_curOptions = $rootScope.r_clothesColor;
+                break;
+            case "衣服花纹":
+                $rootScope.r_curOptions = $rootScope.r_clothesStyle;
+                break;
+            default:
         }
         $rootScope.r_curOptionName = item;
         $scope.modal.show();
@@ -870,28 +873,28 @@ app.controller('meetConditionCtrl', function ($scope, $rootScope, $state, $ionic
 
     $scope.clickItem = function (item) {
         switch ($rootScope.r_curOptionName) {
-        case "地点":
-            $rootScope.r_meetCondition.mapLoc = item;
-            break;
-        case "性别":
-            $rootScope.r_meetCondition.specialInfo.sex = item;
-            break;
-        case "发型":
-            $rootScope.r_meetCondition.specialInfo.hair = item;
-            break;
-        case "眼镜":
-            $rootScope.r_meetCondition.specialInfo.glasses = item;
-            break;
-        case "衣服类型":
-            $rootScope.r_meetCondition.specialInfo.clothesType = item;
-            break;
-        case "衣服颜色":
-            $rootScope.r_meetCondition.specialInfo.clothesColor = item;
-            break;
-        case "衣服花纹":
-            $rootScope.r_meetCondition.specialInfo.clothesStyle = item;
-            break;
-        default:
+            case "地点":
+                $rootScope.r_meetCondition.mapLoc = item;
+                break;
+            case "性别":
+                $rootScope.r_meetCondition.specialInfo.sex = item;
+                break;
+            case "发型":
+                $rootScope.r_meetCondition.specialInfo.hair = item;
+                break;
+            case "眼镜":
+                $rootScope.r_meetCondition.specialInfo.glasses = item;
+                break;
+            case "衣服类型":
+                $rootScope.r_meetCondition.specialInfo.clothesType = item;
+                break;
+            case "衣服颜色":
+                $rootScope.r_meetCondition.specialInfo.clothesColor = item;
+                break;
+            case "衣服花纹":
+                $rootScope.r_meetCondition.specialInfo.clothesStyle = item;
+                break;
+            default:
 
         }
         $scope.modal.hide();
@@ -901,7 +904,7 @@ app.controller('meetConditionCtrl', function ($scope, $rootScope, $state, $ionic
 app.controller('meetInfoCtrl', function ($scope, $rootScope, $state, $ionicModal, $cordovaCamera, PPHttp, $cordovaToast, $cordovaFileTransfer, $ionicLoading) {
     $scope.myGoBack = function () {
         if (!(
-                $rootScope.r_mainInfo.user.specialInfo.clothesColor && $rootScope.r_mainInfo.user.specialInfo.clothesStyle && $rootScope.r_mainInfo.user.specialInfo.clothesType && $rootScope.r_mainInfo.user.specialInfo.glasses && $rootScope.r_mainInfo.user.specialInfo.hair && $rootScope.r_mainInfo.user.specialPic
+            $rootScope.r_mainInfo.user.specialInfo.clothesColor && $rootScope.r_mainInfo.user.specialInfo.clothesStyle && $rootScope.r_mainInfo.user.specialInfo.clothesType && $rootScope.r_mainInfo.user.specialInfo.glasses && $rootScope.r_mainInfo.user.specialInfo.hair && $rootScope.r_mainInfo.user.specialPic
             )) {
             console.log('请填写完整!');
             $cordovaToast.showShortCenter('请填写完整!');
@@ -925,28 +928,28 @@ app.controller('meetInfoCtrl', function ($scope, $rootScope, $state, $ionicModal
             template: '上传中...'
         });
         PPHttp.do(
-                'p',
-                'updateSpecialInfo', {
-                    token: $rootScope.r_mainInfo.token,
-                    hair: $rootScope.r_mainInfo.user.specialInfo.hair,
-                    glasses: $rootScope.r_mainInfo.user.specialInfo.glasses,
-                    clothesType: $rootScope.r_mainInfo.user.specialInfo.clothesType,
-                    clothesColor: $rootScope.r_mainInfo.user.specialInfo.clothesColor,
-                    clothesStyle: $rootScope.r_mainInfo.user.specialInfo.clothesStyle,
-                    specialPic: $rootScope.r_mainInfo.user.specialPic
-                },
-                function (data, status) {
-                    if (data.ppResult == 'ok') {
-                        $rootScope.r_mainInfo.user.specialInfoTime = data.ppData;
-                        $state.go('tab.meet');
-                    }
+            'p',
+            'updateSpecialInfo', {
+                token: $rootScope.r_mainInfo.token,
+                hair: $rootScope.r_mainInfo.user.specialInfo.hair,
+                glasses: $rootScope.r_mainInfo.user.specialInfo.glasses,
+                clothesType: $rootScope.r_mainInfo.user.specialInfo.clothesType,
+                clothesColor: $rootScope.r_mainInfo.user.specialInfo.clothesColor,
+                clothesStyle: $rootScope.r_mainInfo.user.specialInfo.clothesStyle,
+                specialPic: $rootScope.r_mainInfo.user.specialPic
+            },
+            function (data, status) {
+                if (data.ppResult == 'ok') {
+                    $rootScope.r_mainInfo.user.specialInfoTime = data.ppData;
+                    $state.go('tab.meet');
                 }
-            )
+            }
+        )
             .finally(
-                function () {
-                    $ionicLoading.hide();
-                }
-            );
+            function () {
+                $ionicLoading.hide();
+            }
+        );
     };
 
     $ionicModal.fromTemplateUrl(
@@ -963,22 +966,22 @@ app.controller('meetInfoCtrl', function ($scope, $rootScope, $state, $ionicModal
 
     $scope.clickInfoItem = function (item) {
         switch (item) {
-        case "发型":
-            $rootScope.r_curOptions = $rootScope.r_hair;
-            break;
-        case "眼镜":
-            $rootScope.r_curOptions = $rootScope.r_glasses;
-            break;
-        case "衣服类型":
-            $rootScope.r_curOptions = $rootScope.r_clothesType;
-            break;
-        case "衣服颜色":
-            $rootScope.r_curOptions = $rootScope.r_clothesColor;
-            break;
-        case "衣服花纹":
-            $rootScope.r_curOptions = $rootScope.r_clothesStyle;
-            break;
-        default:
+            case "发型":
+                $rootScope.r_curOptions = $rootScope.r_hair;
+                break;
+            case "眼镜":
+                $rootScope.r_curOptions = $rootScope.r_glasses;
+                break;
+            case "衣服类型":
+                $rootScope.r_curOptions = $rootScope.r_clothesType;
+                break;
+            case "衣服颜色":
+                $rootScope.r_curOptions = $rootScope.r_clothesColor;
+                break;
+            case "衣服花纹":
+                $rootScope.r_curOptions = $rootScope.r_clothesStyle;
+                break;
+            default:
         }
         $rootScope.r_curOptionName = item;
         $scope.modal.show();
@@ -986,22 +989,22 @@ app.controller('meetInfoCtrl', function ($scope, $rootScope, $state, $ionicModal
 
     $scope.clickItem = function (item) {
         switch ($rootScope.r_curOptionName) {
-        case "发型":
-            $rootScope.r_mainInfo.user.specialInfo.hair = item;
-            break;
-        case "眼镜":
-            $rootScope.r_mainInfo.user.specialInfo.glasses = item;
-            break;
-        case "衣服类型":
-            $rootScope.r_mainInfo.user.specialInfo.clothesType = item;
-            break;
-        case "衣服颜色":
-            $rootScope.r_mainInfo.user.specialInfo.clothesColor = item;
-            break;
-        case "衣服花纹":
-            $rootScope.r_mainInfo.user.specialInfo.clothesStyle = item;
-            break;
-        default:
+            case "发型":
+                $rootScope.r_mainInfo.user.specialInfo.hair = item;
+                break;
+            case "眼镜":
+                $rootScope.r_mainInfo.user.specialInfo.glasses = item;
+                break;
+            case "衣服类型":
+                $rootScope.r_mainInfo.user.specialInfo.clothesType = item;
+                break;
+            case "衣服颜色":
+                $rootScope.r_mainInfo.user.specialInfo.clothesColor = item;
+                break;
+            case "衣服花纹":
+                $rootScope.r_mainInfo.user.specialInfo.clothesStyle = item;
+                break;
+            default:
 
         }
         $scope.modal.hide();
@@ -1062,41 +1065,52 @@ app.controller('meetInfoCtrl', function ($scope, $rootScope, $state, $ionicModal
 
 });
 
-app.controller('profileCtrl', function ($scope, $rootScope, $state, $ionicHistory, $timeout, $ionicLoading, $http, $cordovaToast, PPHttp) {
+app.controller('profileCtrl', function ($scope, $rootScope, $state, $ionicHistory, $timeout, $ionicLoading, $http, $cordovaToast, $cordovaGeolocation, PPHttp, Push) {
     $scope.test = function(){
-        console.log($rootScope.r_oldSpecial);
-        console.log($rootScope.r_mainInfo.user);
+
     };
 
     $scope.getCurMapPosition = function () {
-        PPHttp.do(
-            'p',
-            'getLastLocation', {
-                token: $rootScope.r_mainInfo.token
-            },
-            function (data, status) {
-                console.log(data);
-                $scope.lastLocation = data.ppData.lastLocation;
-                $scope.lastLocationTime = data.ppData.lastLocationTime;
-                $http.jsonp("http://api.map.baidu.com/geoconv/v1/?callback=JSON_CALLBACK&ak=MgBALVVeCd8THVBi6gPdvsvG&coords=" + $scope.lastLocation[0] + "," + $scope.lastLocation[1])
-                    .
-                success(function (data, status, headers, config) {
-                        //转换为百度坐标
-                        if (data.status == 0) {
-                            $scope.bLng = data.result[0].x;
-                            $scope.bLat = data.result[0].y;
-                        } else {
-                            console.log(data.message);
-                            $cordovaToast.showShortCenter(data.message);
-                        }
-                    })
-                    .
-                error(function (err) {
-                    console.log(err);
-                    $cordovaToast.showShortCenter(err);
-                });
-            }
-        );
+        var posOptions = {timeout: 10000, enableHighAccuracy: true};
+        $cordovaGeolocation
+            .getCurrentPosition(posOptions)
+            .then(function (position) {
+                console.log(position);
+                PPHttp.do(
+                    'p',
+                    'updateLocation', {
+                        lng: position.coords.longitude,
+                        lat: position.coords.latitude,
+                        token: $rootScope.r_mainInfo.token
+                    },
+                    //success
+                    function (data, status) {
+                        $rootScope.r_mainInfo.user.lastLocation = data.ppData.lastLocation;
+                        $rootScope.r_mainInfo.user.lastLocationTime = data.ppData.lastLocationTime;
+                        $scope.lastLocation = data.ppData.lastLocation;
+                        $scope.lastLocationTime = data.ppData.lastLocationTime;
+                        $http.jsonp("http://api.map.baidu.com/geoconv/v1/?callback=JSON_CALLBACK&ak=MgBALVVeCd8THVBi6gPdvsvG&coords=" + $scope.lastLocation[0] + "," + $scope.lastLocation[1])
+                            .
+                            success(function (data, status, headers, config) {
+                                //转换为百度坐标
+                                if (data.status == 0) {
+                                    $scope.bLng = data.result[0].x;
+                                    $scope.bLat = data.result[0].y;
+                                } else {
+                                    console.log(data.message);
+                                    $cordovaToast.showShortCenter(data.message);
+                                }
+                            })
+                            .
+                            error(function (err) {
+                                console.log(err);
+                                $cordovaToast.showShortCenter(err);
+                            });
+                    }
+                );
+            }, function(err) {
+                $cordovaToast.showShortCenter(err);
+            });
     }
 
     $scope.mapLocs = [];
@@ -1112,68 +1126,8 @@ app.controller('profileCtrl', function ($scope, $rootScope, $state, $ionicHistor
             template: '退出中...'
         });
 
-        //清空当前$root数据, 取消jpush alias
+        //取消jpush alias
         Push.setAlias("");
-        $rootScope.r_infoNeedUpdateTime = 0;
-
-        $rootScope.r_curMeet = null;
-
-        $rootScope.r_curChatFriendUsername = null;
-        $rootScope.r_curChatFriendNickname = null;
-        $rootScope.r_curChatMsg = null;
-
-        $rootScope.r_searchMode = null;
-
-        $rootScope.r_curOptions = [];
-        $rootScope.r_curOptionName = null;
-
-        $rootScope.r_mainInfo = null;
-
-        $rootScope.r_imagePath = $rootScope.r_serverRoot + 'images/';
-        $rootScope.r_sysImagePath = $rootScope.r_serverRoot + 'images/system/';
-
-        $rootScope.r_curOptions = [];
-        $rootScope.r_curOptionName = null;
-
-        $rootScope.r_myLocation = {
-            lng: null,
-            lat: null
-        }
-
-        $rootScope.r_myInfo = {
-            "specialInfo": {
-                "sex": null,
-                "clothesColor": null,
-                "clothesStyle": null,
-                "clothesType": null,
-                "glasses": null,
-                "hair": null
-            },
-            specialPic: null,
-            specialPicDisplay: null
-        }
-
-        $rootScope.r_meetCondition = {
-            mapLoc: {
-                uid: '',
-                name: '',
-                address: ''
-            },
-            specialInfo: {
-                sex: '',
-                clothesColor: '',
-                clothesStyle: '',
-                clothesType: '',
-                glasses: '',
-                hair: ''
-            }
-        };
-
-        $rootScope.r_oldSpecial = {};
-
-        $rootScope.r_meetTargetUpdated = {};
-
-        $rootScope.r_targets = [];
 
         $state.go('login');
         $timeout(function () {
@@ -1246,10 +1200,10 @@ app.controller('conditionSpecialCtrl', function ($scope, $rootScope, $state, $io
         else {
             if (targetUsername == 'fake') {
                 $http.put(
-                        $rootScope.serverRoot + 'fakeSelect', {
-                            username: $rootScope.user.username
-                        }
-                    )
+                    $rootScope.serverRoot + 'fakeSelect', {
+                        username: $rootScope.user.username
+                    }
+                )
                     .success(function (data, status, headers, config) {
                         // this callback will be called asynchronously
                         // when the response is available
@@ -1263,63 +1217,63 @@ app.controller('conditionSpecialCtrl', function ($scope, $rootScope, $state, $io
                         $scope.modal.hide();
                     })
                     .
-                error($rootScope.ppError);
+                    error($rootScope.ppError);
             } else {
                 $ionicLoading.show({
                     template: '处理中...'
                 });
                 if ($rootScope.r_searchMode == '确认') {
                     PPHttp.do(
-                            'p',
-                            'confirmMeetClickTarget', {
-                                token: $rootScope.r_mainInfo.token,
-                                username: targetUsername,
-                                meetId: $rootScope.r_curMeet._id
-                            },
-                            //success
-                            function (data, status) {
-                                $ionicHistory.nextViewOptions({
-                                    disableAnimate: true,
-                                    disableBack: true,
-                                    historyRoot: true
-                                });
-                                $state.go('tab.meet');
-                                $scope.modal.hide();
-                            }
-                        )
+                        'p',
+                        'confirmMeetClickTarget', {
+                            token: $rootScope.r_mainInfo.token,
+                            username: targetUsername,
+                            meetId: $rootScope.r_curMeet._id
+                        },
+                        //success
+                        function (data, status) {
+                            $ionicHistory.nextViewOptions({
+                                disableAnimate: true,
+                                disableBack: true,
+                                historyRoot: true
+                            });
+                            $state.go('tab.meet');
+                            $scope.modal.hide();
+                        }
+                    )
                         .finally(
-                            function () {
-                                $ionicLoading.hide();
-                            }
-                        );
+                        function () {
+                            $ionicLoading.hide();
+                        }
+                    );
                 } else if ($rootScope.r_searchMode == '新建') {
                     console.log($rootScope.r_meetCondition.mapLoc);
                     PPHttp.do(
-                            'p',
-                            'createMeetClickTarget', {
-                                token: $rootScope.r_mainInfo.token,
-                                username: targetUsername,
-                                mapLocName: $rootScope.r_meetCondition.mapLoc.name,
-                                mapLocUid: $rootScope.r_meetCondition.mapLoc.uid,
-                                mapLocAddress: $rootScope.r_meetCondition.mapLoc.address
-                            },
-                            //success
-                            function (data, status) {
-                                PPHttp.doRefreshAll();
-                                $ionicHistory.nextViewOptions({
-                                    disableAnimate: true,
-                                    disableBack: true,
-                                    historyRoot: true
-                                });
-                                $state.go('tab.meet');
-                                $scope.modal.hide();
-                            }
-                        )
+                        'p',
+                        'createMeetClickTarget', {
+                            token: $rootScope.r_mainInfo.token,
+                            username: targetUsername,
+                            mapLocName: $rootScope.r_meetCondition.mapLoc.name,
+                            mapLocUid: $rootScope.r_meetCondition.mapLoc.uid,
+                            mapLocAddress: $rootScope.r_meetCondition.mapLoc.address
+                        },
+                        //success
+                        function (data, status) {
+                            PPHttp.doRefreshAll();
+                            $ionicHistory.nextViewOptions({
+                                disableAnimate: true,
+                                disableBack: true,
+                                historyRoot: true
+                            });
+                            $state.go('tab.meet');
+                            $scope.modal.hide();
+                        }
+                    )
                         .finally(
-                            function () {
-                                $ionicLoading.hide();
-                            }
-                        );
+                        function () {
+                            $ionicLoading.hide();
+                        }
+                    );
                 }
             }
         }
@@ -1339,36 +1293,36 @@ app.controller('conditionSpecialCtrl', function ($scope, $rootScope, $state, $io
                 template: '处理中...'
             });
             PPHttp.do(
-                    'p',
-                    'createMeetNo', {
-                        token: $rootScope.r_mainInfo.token,
-                        mapLocName: $rootScope.r_meetCondition.mapLoc.name,
-                        mapLocUid: $rootScope.r_meetCondition.mapLoc.uid,
-                        mapLocAddress: $rootScope.r_meetCondition.mapLoc.address,
-                        sex: $rootScope.r_meetCondition.specialInfo.sex,
-                        hair: $rootScope.r_meetCondition.specialInfo.hair,
-                        glasses: $rootScope.r_meetCondition.specialInfo.glasses,
-                        clothesType: $rootScope.r_meetCondition.specialInfo.clothesType,
-                        clothesColor: $rootScope.r_meetCondition.specialInfo.clothesColor,
-                        clothesStyle: $rootScope.r_meetCondition.specialInfo.clothesStyle
-                    },
-                    //success
-                    function (data, status) {
-                        PPHttp.doRefreshAll();
-                        $ionicHistory.nextViewOptions({
-                            disableAnimate: true,
-                            disableBack: true,
-                            historyRoot: true
-                        });
-                        $state.go('tab.meet');
-                        $scope.modal.hide();
-                    }
-                )
+                'p',
+                'createMeetNo', {
+                    token: $rootScope.r_mainInfo.token,
+                    mapLocName: $rootScope.r_meetCondition.mapLoc.name,
+                    mapLocUid: $rootScope.r_meetCondition.mapLoc.uid,
+                    mapLocAddress: $rootScope.r_meetCondition.mapLoc.address,
+                    sex: $rootScope.r_meetCondition.specialInfo.sex,
+                    hair: $rootScope.r_meetCondition.specialInfo.hair,
+                    glasses: $rootScope.r_meetCondition.specialInfo.glasses,
+                    clothesType: $rootScope.r_meetCondition.specialInfo.clothesType,
+                    clothesColor: $rootScope.r_meetCondition.specialInfo.clothesColor,
+                    clothesStyle: $rootScope.r_meetCondition.specialInfo.clothesStyle
+                },
+                //success
+                function (data, status) {
+                    PPHttp.doRefreshAll();
+                    $ionicHistory.nextViewOptions({
+                        disableAnimate: true,
+                        disableBack: true,
+                        historyRoot: true
+                    });
+                    $state.go('tab.meet');
+                    $scope.modal.hide();
+                }
+            )
                 .finally(
-                    function () {
-                        $ionicLoading.hide();
-                    }
-                );
+                function () {
+                    $ionicLoading.hide();
+                }
+            );
         }
     }
 
@@ -1410,11 +1364,11 @@ app.controller('contactCtrl', function ($scope, $rootScope, $state, $timeout, $i
         PPHttp
             .doRefreshAll()
             .finally(
-                function () {
-                    $scope.$broadcast('scroll.refreshComplete');
-                    //$scope.$apply();
-                }
-            );
+            function () {
+                $scope.$broadcast('scroll.refreshComplete');
+                //$scope.$apply();
+            }
+        );
     };
 });
 
@@ -1427,23 +1381,23 @@ app.controller('chatCtrl', function ($scope, $rootScope, $state, $stateParams, $
 
     $scope.myGoBack = function () {
         PPHttp.do(
-                'p',
-                'readMsg', {
-                    token: $rootScope.r_mainInfo.token,
-                    friendUsername: $rootScope.r_curChatFriendUsername
-                },
-                function (data, status) {
-                    $rootScope.r_mainInfo.unreadMsgCounts[$rootScope.r_curChatFriendUsername] = 0;
-                }
-            )
+            'p',
+            'readMsg', {
+                token: $rootScope.r_mainInfo.token,
+                friendUsername: $rootScope.r_curChatFriendUsername
+            },
+            function (data, status) {
+                $rootScope.r_mainInfo.unreadMsgCounts[$rootScope.r_curChatFriendUsername] = 0;
+            }
+        )
             .finally(
-                function () {
-                    $rootScope.r_curChatFriendUsername = null;
-                    $rootScope.r_curChatFriendNickname = null;
-                    $rootScope.r_curChatMsg = null;
-                    $state.go('tab.contact');
-                }
-            );
+            function () {
+                $rootScope.r_curChatFriendUsername = null;
+                $rootScope.r_curChatFriendNickname = null;
+                $rootScope.r_curChatMsg = null;
+                $state.go('tab.contact');
+            }
+        );
     };
 
     $scope.sendMessage = function () {
@@ -1542,35 +1496,35 @@ app.factory('PPHttp', function ($rootScope, $http, $cordovaToast) {
             var e = err || handleErr;
             var p = paramObj || {};
             switch (methord) {
-            case 'g':
-                return $http.get($rootScope.r_serverRoot + "users/" + path, p)
-                    .success(s)
-                    .error(e);
-                break;
-            case 'p':
-                return $http.post($rootScope.r_serverRoot + "users/" + path, p)
-                    .success(s)
-                    .error(e);
-                break;
-            default:
-                return $http.post($rootScope.r_serverRoot + "users/" + path, p)
-                    .success(s)
-                    .error(e);
+                case 'g':
+                    return $http.get($rootScope.r_serverRoot + "users/" + path, p)
+                        .success(s)
+                        .error(e);
+                    break;
+                case 'p':
+                    return $http.post($rootScope.r_serverRoot + "users/" + path, p)
+                        .success(s)
+                        .error(e);
+                    break;
+                default:
+                    return $http.post($rootScope.r_serverRoot + "users/" + path, p)
+                        .success(s)
+                        .error(e);
             }
         },
         doRefreshAll: function () {
             return $http.post($rootScope.r_serverRoot + "users/" + "getAll", {
-                    token: $rootScope.r_mainInfo.token
-                })
+                token: $rootScope.r_mainInfo.token
+            })
                 .success(
-                    function (data, status) {
-                        $rootScope.r_mainInfo.meets = data.ppData.meets;
-                        $rootScope.r_mainInfo.friends = data.ppData.friends.main;
-                        $rootScope.r_mainInfo.friendPics = data.ppData.friends.pics;
-                        $rootScope.r_mainInfo.unreadMsgCounts = data.ppData.friends.unreadMsgCounts;
-                        console.log($rootScope.r_mainInfo);
-                    }
-                )
+                function (data, status) {
+                    $rootScope.r_mainInfo.meets = data.ppData.meets;
+                    $rootScope.r_mainInfo.friends = data.ppData.friends.main;
+                    $rootScope.r_mainInfo.friendPics = data.ppData.friends.pics;
+                    $rootScope.r_mainInfo.unreadMsgCounts = data.ppData.friends.unreadMsgCounts;
+                    console.log($rootScope.r_mainInfo);
+                }
+            )
                 .error(handleErr);
         }
     };
