@@ -91,11 +91,11 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
 
             $rootScope.r_glasses = [
                 "带",
-                "无" //"不带"
+                "不带"
             ];
 
             $rootScope.r_clothesType = [
-                "大衣", //"风衣/大衣/夹克",
+                "风衣/大衣/夹克",
                 "西装/套装",
                 "运动外套/卫衣",
                 "T恤长袖",
@@ -345,6 +345,27 @@ app.controller('loginCtrl', function ($scope, $rootScope, $state, $cordovaToast,
             //success
             function (data, status) {
                 //jpush
+                document.addEventListener("jpush.setTagsWithAlias", function(event){
+                    try{
+                        var result="result code:"+event.resultCode+" ";
+                        result+="tags:"+event.tags+" ";
+                        result+="alias:"+event.alias+" ";
+                        console.log("onTagsWithAlias" + result);
+                        if (event.resultCode != 0)
+                        {
+                            $cordovaToast.showShortCenter('联系通知服务器未成功,您现在收不到推送通知,正在重试用中...');
+                            Push.setAlias($rootScope.r_mainInfo.user.username);
+                        }
+                        else
+                        {
+                            $cordovaToast.showShortCenter('联系通知服务器成功!');
+                        }
+                    }
+                    catch(exception){
+                        console.log(exception)
+                    }
+                }, false);
+
                 document.addEventListener("jpush.receiveNotification", function (event) {
                     $cordovaToast.showShortCenter(event.aps.alert);
                     console.log("jpush.receiveNotification");
@@ -450,10 +471,7 @@ app.controller('loginCtrl', function ($scope, $rootScope, $state, $cordovaToast,
                 //};
 
                 Push.init();
-                Push.setAlias(data.ppData.user.username, function(result){
-                    console.log('aaaaa');
-                    console.log(result);
-                });
+                Push.setAlias(data.ppData.user.username);
 
                 $rootScope.r_bgGeo.start();
                 $cordovaToast.showShortCenter("ppstart");
