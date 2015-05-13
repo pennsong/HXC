@@ -5,7 +5,7 @@
     </ion-nav-bar>
 
     <ion-content class="content-stable" on-swipe-left="onSwipeLeft()" on-swipe-right="onSwipeRight()">
-        <div ng-repeat="message in r_curChatMsg"
+        <div ng-repeat="message in r_messages[r_curCouple]"
              ng-class="{other: message.from != r_mainInfo.user.username}"
              class="messages">
 

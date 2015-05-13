@@ -5,22 +5,48 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.services' is found in services.js
 // 'starter.controllers' is found in controllers.js
-var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
+var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment', 'firebase'])
 
     .run(function ($ionicPlatform, $cordovaDevice, $cordovaKeyboard, $cordovaToast, $rootScope, PPHttp) {
         $ionicPlatform.ready(function () {
             // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
             // for form inputs)
             //$rootScope.r_serverRoot = "http://192.168.43.30:3000/";
-            $rootScope.r_serverRoot = "https://pphx.herokuapp.com/";
-            //$rootScope.r_serverRoot = "http://192.168.77.158:5000/";
-            $rootScope.r_infoNeedUpdateTime = 0;
+            //$rootScope.r_serverRoot = "https://pphx.herokuapp.com/";
+            $rootScope.r_serverRoot = "http://192.168.1.16:3000/";
 
-            $rootScope.r_curMeet = null;
+            $rootScope.r_amOnline = new Firebase('https://hxbase.firebaseio.com/.info/connected');
+            $rootScope.r_userRef = new Firebase('https://hxbase.firebaseio.com/online');
+
+            $rootScope.r_amOnline.on('value', function(snapshot) {
+                if (snapshot.val()) {
+                    $rootScope.r_userRef.onDisconnect().remove();
+                    $rootScope.r_userRef.set(true);
+                }
+            });
+
+            $rootScope.r_newUser = null;
+
+            $rootScope.r_hxMeets = new Firebase('https://hxbase.firebaseio.com/meets');
+            $rootScope.r_hxCreaterMeets = null;
+            $rootScope.r_hxtargetMeets = null;
+            $rootScope.r_meets = {};
+
+            $rootScope.r_hxFriends = new Firebase('https://hxbase.firebaseio.com/friends');
+            $rootScope.r_hxFromFriends = null;
+            $rootScope.r_hxToFriends = null;
+            $rootScope.r_friends = {};
+
 
             $rootScope.r_curChatFriendUsername = null;
             $rootScope.r_curChatFriendNickname = null;
-            $rootScope.r_curChatMsg = null;
+
+            $rootScope.r_curCouple = null;
+
+            $rootScope.r_hxMessages = new Firebase('https://hxbase.firebaseio.com/messages');
+            $rootScope.r_messages = {};
+
+            $rootScope.r_curMeet = null;
 
             $rootScope.r_searchMode = null;
 
@@ -32,8 +58,7 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
             $rootScope.r_imagePath = $rootScope.r_serverRoot + 'images/';
             $rootScope.r_sysImagePath = $rootScope.r_serverRoot + 'images/system/';
 
-            $rootScope.r_curOptions = [];
-            $rootScope.r_curOptionName = null;
+            $rootScope.r_bgGeo = window.plugins.backgroundGeoLocation;
 
             $rootScope.r_myLocation = {
                 lng: null,
@@ -49,8 +74,7 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
                     "glasses": null,
                     "hair": null
                 },
-                specialPic: null,
-                specialPicDisplay: null
+                specialPic: null
             }
 
             $rootScope.r_meetCondition = {
@@ -70,8 +94,6 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
             };
 
             $rootScope.r_oldSpecial = {};
-
-            $rootScope.r_meetTargetUpdated = {};
 
             $rootScope.r_targets = [];
 
@@ -122,7 +144,6 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
                 "图案(抽象,卡通,画等)"
             ];
 
-
             if (window.cordova && window.cordova.plugins.Keyboard) {
                 cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
                 cordova.plugins.Keyboard.disableScroll(true);
@@ -132,11 +153,22 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
                 StatusBar.styleLightContent();
             }
 
+            //用来触发用户允许访问地理位置
             window.navigator.geolocation.getCurrentPosition(function (location) {
                 //console.log('Location from Phonegap');
             });
 
-            $rootScope.r_bgGeo = window.plugins.backgroundGeoLocation;
+            document.addEventListener("pause",
+                function(){
+                    $rootScope.r_userRef.set(false);
+                },
+                false);
+
+            document.addEventListener("resume",
+                function(){
+                    $rootScope.r_userRef.set(true);
+                },
+                false);
 
             var yourAjaxCallback = function (location) {
                 //alert('1[js] BackgroundGeoLocation callback:  ' + location.latitude + ',' + location.longitude);
@@ -159,7 +191,7 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
                     function (data, status) {
                         $rootScope.r_mainInfo.user.lastLocation = data.ppData.lastLocation;
                         $rootScope.r_mainInfo.user.lastLocationTime = data.ppData.lastLocationTime;
-                        $cordovaToast.showShortCenter($rootScope.r_mainInfo.user.lastLocation[0] + "," + $rootScope.r_mainInfo.user.lastLocation[1]);
+                        //$cordovaToast.showShortCenter($rootScope.r_mainInfo.user.lastLocation[0] + "," + $rootScope.r_mainInfo.user.lastLocation[1]);
                         //console.log(data.ppData);
                     }
                 )
@@ -184,14 +216,14 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
                 //
                 //
                 //alert('2[js] BackgroundGeoLocation callback:  ' + location.latitude + ',' + location.longitude);
-                $cordovaToast.showShortCenter('callback');
+                //$cordovaToast.showShortCenter('callback');
                 //console.log('---------------------------');
                 //console.log(location);
                 yourAjaxCallback.call(this, location);
             };
 
             var failureFn = function (error) {
-                $cordovaToast.showShortCenter(error);
+                //$cordovaToast.showShortCenter(error);
                 //console.log(error);
                 //$cordovaToast.showShortCenter('e:' + error);
                 //alert('BackgroundGeoLocation error');
@@ -314,7 +346,7 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment'])
             });
     });
 
-app.controller('loginCtrl', function ($scope, $rootScope, $state, $cordovaToast, $ionicScrollDelegate, PPHttp, Push) {
+app.controller('loginCtrl', function ($scope, $rootScope, $state, $cordovaToast, $ionicScrollDelegate, $firebaseArray, PPHttp, Push) {
     $scope.user = {};
 
     $scope.goRegister = function () {
@@ -322,8 +354,7 @@ app.controller('loginCtrl', function ($scope, $rootScope, $state, $cordovaToast,
             username: null,
             password: null,
             sex: null,
-            nickname: null,
-            cid: null
+            nickname: null
         }
 
         $state.go("register");
@@ -339,11 +370,106 @@ app.controller('loginCtrl', function ($scope, $rootScope, $state, $cordovaToast,
             'p',
             'login', {
                 username: user.username,
-                password: user.password,
-                cid: 't1' //$cordovaDevice.getUUID()
+                password: user.password
             },
             //success
             function (data, status) {
+                $rootScope.r_hxCreaterMeets = $firebaseArray($rootScope.r_hxMeets.orderByChild("createrUsername").equalTo(user.username));
+
+                $rootScope.r_hxCreaterMeets.$watch(
+                    function(event) {
+                        //console.log(event);
+                        //console.log($rootScope.r_hxCreaterMeets.$getRecord(event.key));
+                        if (event.event == 'child_added')
+                        {
+                            $scope.r_meets[event.key] = ($rootScope.r_hxCreaterMeets.$getRecord(event.key));
+                        }
+                        else if (event.event == 'child_removed')
+                        {
+                            delete $scope.r_meets[event.key];
+                        }
+                    }
+                );
+
+                $rootScope.r_hxtargetMeets = $firebaseArray($rootScope.r_hxMeets.orderByChild("targetUsername").equalTo(user.username));
+
+                $rootScope.r_hxtargetMeets.$watch(
+                    function(event) {
+                        //console.log(event);
+                        //console.log($rootScope.r_hxCreaterMeets.$getRecord(event.key));
+                        if (event.event == 'child_added')
+                        {
+                            $scope.r_meets[event.key] = ($rootScope.r_hxtargetMeets.$getRecord(event.key));
+                        }
+                        else if (event.event == 'child_removed')
+                        {
+                            delete $scope.r_meets[event.key];
+                        }
+                    }
+                );
+
+                $rootScope.r_hxFromFriends = $firebaseArray($rootScope.r_hxFriends.orderByChild("username1").equalTo(user.username));
+
+                $rootScope.r_hxFromFriends.$watch(
+                    function(event) {
+                        //console.log(event);
+                        //console.log(ta.$getRecord(event.key));
+                        if (event.event == 'child_added')
+                        {
+                            var record = $rootScope.r_hxFromFriends.$getRecord(event.key);
+                            $scope.r_friends[event.key] = (record);
+                            //订阅对应消息
+                            var f1 = record.username1.toLowerCase();
+                            var f2 = record.username2.toLowerCase();
+                            var key = f1 > f2 ? f2 + "_" + f1 : f1 + "_" + f2;
+
+                            $rootScope.r_messages[key] = $firebaseArray($rootScope.r_hxMessages.orderByChild("couple").equalTo(key));
+                        }
+                        else if (event.event == 'child_removed')
+                        {
+                            var record = $rootScope.r_hxFromFriends.$getRecord(event.key);
+                            delete $scope.r_friends[event.key];
+                            //取消订阅对应消息
+                            var f1 = record.username1.toLowerCase();
+                            var f2 = record.username2.toLowerCase();
+                            var key = f1 > f2 ? f2 + "_" + f1 : f1 + "_" + f2;
+
+                            delete $rootScope.r_messages[key];
+                        }
+                    }
+                );
+
+                $rootScope.r_hxToFriends = $firebaseArray($rootScope.r_hxFriends.orderByChild("username2").equalTo(user.username));
+
+                $rootScope.r_hxToFriends.$watch(
+                    function(event) {
+                        //console.log(event);
+                        //console.log(ta.$getRecord(event.key));
+                        if (event.event == 'child_added')
+                        {
+                            var record = $rootScope.r_hxToFriends.$getRecord(event.key);
+                            $scope.r_friends[event.key] = (record);
+                            //订阅对应消息
+                            var f1 = record.username1.toLowerCase();
+                            var f2 = record.username2.toLowerCase();
+                            var key = f1 > f2 ? f2 + "_" + f1 : f1 + "_" + f2;
+
+                            $rootScope.r_messages[key] = $firebaseArray($rootScope.r_hxMessages.orderByChild("couple").equalTo(key));
+                        }
+                        else if (event.event == 'child_removed')
+                        {
+                            var record = $rootScope.r_hxFromFriends.$getRecord(event.key);
+                            delete $scope.r_friends[event.key];
+                            //取消订阅对应消息
+                            var f1 = record.username1.toLowerCase();
+                            var f2 = record.username2.toLowerCase();
+                            var key = f1 > f2 ? f2 + "_" + f1 : f1 + "_" + f2;
+
+                            delete $rootScope.r_messages[key];
+                        }
+                    }
+                );
+
                 //jpush
                 document.addEventListener("jpush.setTagsWithAlias", function(event){
                     try{
@@ -362,126 +488,21 @@ app.controller('loginCtrl', function ($scope, $rootScope, $state, $cordovaToast,
                         }
                     }
                     catch(exception){
-                        console.log(exception)
+                        $cordovaToast.showShortCenter('联系通知服务器未成功,您现在收不到推送通知!');
+                        //console.log(exception)
                     }
                 }, false);
-
-                document.addEventListener("jpush.receiveNotification", function (event) {
-                    $cordovaToast.showShortCenter(event.aps.alert);
-                    console.log("jpush.receiveNotification");
-                    //分析alert内容
-                    var alertContent = event.aps.alert;
-                    var commaIndex = alertContent.indexOf(',');
-                    var colonIndex = alertContent.indexOf(':');
-                    if (commaIndex > -1 && colonIndex > -1) {
-                        //收到朋友消息提醒
-                        var friendUsername = alertContent.substring(0, commaIndex);
-
-                        if ($rootScope.r_curChatFriendUsername == friendUsername) {
-                            //在对话中
-                            PPHttp.do(
-                                'p',
-                                'getMsg', {
-                                    token: $rootScope.r_mainInfo.token,
-                                    friendUsername: friendUsername
-                                },
-                                function (data, status) {
-                                    $rootScope.r_curChatMsg = data.ppData;
-                                    $ionicScrollDelegate.scrollBottom(true);
-                                }
-                            );
-                        } else {
-                            //不在对话中
-                            PPHttp.do(
-                                'p',
-                                'getFriendUnreadCount', {
-                                    token: $rootScope.r_mainInfo.token,
-                                    friendUsername: friendUsername
-                                },
-                                //success
-                                function (data, status) {
-                                    $rootScope.r_mainInfo.unreadMsgCounts[friendUsername] = data.ppData;
-                                }
-                            );
-                        }
-                    } else {
-                        PPHttp.doRefreshAll();
-                    }
-                }, false);
-
-                document.addEventListener("jpush.openNotification", function (event) {
-                    $cordovaToast.showShortCenter(event.aps.alert);
-                    console.log("jpush.openNotification");
-                    //分析alert内容
-                    var alertContent = event.aps.alert;
-                    var commaIndex = alertContent.indexOf(',');
-                    var colonIndex = alertContent.indexOf(':');
-                    if (commaIndex > -1 && colonIndex > -1) {
-                        //收到朋友消息提醒
-                        var friendUsername = alertContent.substring(0, commaIndex);
-
-                        if ($rootScope.r_curChatFriendUsername == friendUsername) {
-                            //在对话中
-                            PPHttp.do(
-                                'p',
-                                'getMsg', {
-                                    token: $rootScope.r_mainInfo.token,
-                                    friendUsername: friendUsername
-                                },
-                                function (data, status) {
-                                    $rootScope.r_curChatMsg = data.ppData;
-                                    $ionicScrollDelegate.scrollBottom(true);
-                                }
-                            );
-                        } else {
-                            //不在对话中
-                            PPHttp.do(
-                                'p',
-                                'getFriendUnreadCount', {
-                                    token: $rootScope.r_mainInfo.token,
-                                    friendUsername: friendUsername
-                                },
-                                //success
-                                function (data, status) {
-                                    $rootScope.r_mainInfo.unreadMsgCounts[friendUsername] = data.ppData;
-                                }
-                            );
-                        }
-                    } else {
-                        PPHttp.doRefreshAll();
-                    }
-                }, false);
-
-                //// push notification callback
-                //var notificationCallback = function(data) {
-                //    console.log('pp received data :' + data);
-                //    var notification = angular.fromJson(data);
-                //    console.log(notification);
-                //    //app 是否处于正在运行状态
-                //    var isActive = notification.isActive;
-                //
-                //    // here add your code
-                //
-                //    //ios
-                //    if (ionic.Platform.isIOS()) {
-                //        $cordovaToast.showShortCenter(notification.aps.alert);
-                //    } else {
-                //        //非 ios(android)
-                //    }
-                //};
 
                 Push.init();
                 Push.setAlias(data.ppData.user.username);
 
                 $rootScope.r_bgGeo.start();
-                $cordovaToast.showShortCenter("ppstart");
 
                 $rootScope.r_mainInfo = data.ppData;
                 //console.log(data.ppData);
                 window.localStorage['username'] = data.ppData.user.username;
                 window.localStorage['nickname'] = data.ppData.user.nickname;
                 window.localStorage['token'] = data.ppData.token;
-                PPHttp.doRefreshAll();
                 $state.go("tab.meet");
             }
         );
@@ -494,13 +515,11 @@ app.controller('registerCtrl', function ($scope, $rootScope, $state, PPHttp, $co
         username: null,
         password: null,
         sex: null,
-        nickname: null,
-        cid: null
+        nickname: null
     }
 
     $scope.register = function (newUser) {
-        newUser.cid = 't2'; //$cordovaDevice.getUUID();
-        if (!(newUser.username && newUser.password && newUser.sex && newUser.nickname && newUser.cid)) {
+        if (!(newUser.username && newUser.password && newUser.sex && newUser.nickname)) {
             $cordovaToast.showShortCenter('用户名, 密码, 性别, 昵称都不能为空!');
             return;
         }
@@ -511,15 +530,11 @@ app.controller('registerCtrl', function ($scope, $rootScope, $state, PPHttp, $co
                 username: newUser.username,
                 password: newUser.password,
                 nickname: newUser.nickname,
-                cid: newUser.cid,
                 sex: newUser.sex
             },
             //success
             function (data, status) {
-                $rootScope.r_mainInfo = data.ppData;
-                window.localStorage['username'] = newUser.username;
-                window.localStorage['token'] = data.ppData.token;
-                $state.go("tab.meet");
+                $state.go("login");
             }
         );
     }
@@ -538,29 +553,13 @@ app.controller('meetCtrl', function ($scope, $rootScope, $state, $ionicModal, $i
         }
     );
 
-    $scope.unread = function (meet) {
-        if (
-            (meet.creater.username == $rootScope.r_mainInfo.user.username && meet.creater.unread == true) ||
-            (meet.target && meet.target.username == $rootScope.r_mainInfo.user.username && meet.target.unread == true)
-        ) {
-            return true;
-        } else {
-            return false;
-        }
-    };
-
     $scope.readMeet = function (meet) {
-        if (meet.creater.username == $rootScope.r_mainInfo.user.username && meet.creater.unread == true) {
-            meet.creater.unread = false;
-            PPHttp.do(
-                'p',
-                'readMeet', {
-                    token: $rootScope.r_mainInfo.token,
-                    meetId: meet._id
-                }
-            );
-        } else if (meet.target && meet.target.username == $rootScope.r_mainInfo.user.username && meet.target.unread == true) {
-            meet.target.unread = false;
+        if (
+            (meet.createrUsername == $rootScope.r_mainInfo.user.username && meet.createrUnread == true)
+            ||
+            (meet.targetUsername == $rootScope.r_mainInfo.user.username && meet.targetUnread == true)
+        )
+        {
             PPHttp.do(
                 'p',
                 'readMeet', {
@@ -582,28 +581,10 @@ app.controller('meetCtrl', function ($scope, $rootScope, $state, $ionicModal, $i
             $rootScope.r_curMeet = meet;
             $rootScope.r_searchMode = '确认';
 
-            //if (!($rootScope.r_meetTargetUpdated[meet._id])) //test
-            //if ($rootScope.r_meetTargetUpdated[meet._id])
-            //{
-            //    PPHttp.do(
-            //        'p',
-            //        'confirmMeetSearchTarget', {
-            //            token: $rootScope.r_mainInfo.token,
-            //            meetId: meet._id
-            //        },
-            //        //success
-            //        function (data, status) {
-            //            $rootScope.r_targets = data.ppData;
-            //            $state.go('tab.meet.condition.specialPic');
-            //        }
-            //    );
-            //}
-            //else
-            //{
             $state.go('tab.meet.condition');
-            //}
-        } else if (meet.status == '待回复') {
-            if (meet.target.username == $rootScope.r_mainInfo.user.username) {
+        }
+        else if (meet.status == '待回复') {
+            if (meet.targetUsername == $rootScope.r_mainInfo.user.username) {
                 $rootScope.r_searchMode = '回复';
                 $rootScope.r_meetCondition = {
                     mapLoc: meet.mapLoc,
@@ -618,29 +599,18 @@ app.controller('meetCtrl', function ($scope, $rootScope, $state, $ionicModal, $i
                 };
                 $rootScope.r_curMeet = meet;
                 $state.go('tab.meet.condition');
-            } else if (meet.creater.username == $rootScope.r_mainInfo.user.username) {
+            }
+            else if (meet.createrUsername == $rootScope.r_mainInfo.user.username) {
                 $rootScope.r_curMeet = meet;
-                //console.log(meet);
                 $scope.modal.show();
             }
         }
     }
 
-    $scope.doRefresh = function () {
-        PPHttp
-            .doRefreshAll()
-            .finally(
-            function () {
-                $scope.$broadcast('scroll.refreshComplete');
-                //$scope.$apply();
-            }
-        );
-    };
-
     $scope.createMeet = function () {
         $rootScope.r_curMeet = null;
         $ionicLoading.show({
-            template: 'Loading...'
+            template: '努力中...'
         });
         PPHttp.do(
             'p',
@@ -682,8 +652,6 @@ app.controller('meetCtrl', function ($scope, $rootScope, $state, $ionicModal, $i
                 .startOf('day')
                 .isBefore(moment($rootScope.r_mainInfo.user.specialInfoTime))
             )) {
-            //console.log($rootScope.r_mainInfo.user.specialInfoTime);
-            //console.log(moment().startOf('day').add(4, 'hours').isBefore($rootScope.r_mainInfo.user.specialInfoTime));
 
             $rootScope.r_mainInfo.user.specialInfo.hair = null;
             $rootScope.r_mainInfo.user.specialInfo.glasses = null;
@@ -702,7 +670,6 @@ app.controller('meetCtrl', function ($scope, $rootScope, $state, $ionicModal, $i
             };
 
         }
-        //console.log($rootScope.r_mainInfo);
         $state.go('tab.meet.info');
     };
 });
@@ -843,7 +810,6 @@ app.controller('meetConditionCtrl', function ($scope, $rootScope, $state, $ionic
             }
             $rootScope.r_curOptions = [];
             if (!($rootScope.r_mainInfo.user.lastLocation[0] && $rootScope.r_mainInfo.user.lastLocation[1])) {
-                console.log('未能获取您的当前位置,请调整位置后重试!');
                 $cordovaToast.showShortCenter('未能获取您的当前位置,请调整位置后重试!');
                 return;
             }
@@ -1063,20 +1029,20 @@ app.controller('meetInfoCtrl', function ($scope, $rootScope, $state, $ionicModal
                             $rootScope.r_mainInfo.user.specialPicDisplay = $rootScope.r_mainInfo.user.specialPic;
                             //console.log($rootScope.r_mainInfo.user.specialPic);
                         }, function (err) {
-                            console.log(err);
+                            //console.log(err);
                             $cordovaToast.showShortCenter(err);
                         }, function (progress) {
                             // constant progress updates
                         });
                 }, function (err) {
                     // error
-                    console.log(err);
+                    // console.log(err);
                     $cordovaToast.showShortCenter(err);
                     $rootScope.r_mainInfo.user.specialPic = "tbd.jpeg";
                     $rootScope.r_mainInfo.user.specialPicDisplay = $rootScope.r_mainInfo.user.specialPic;
                 });
         } catch (err) {
-            console.log(err);
+            //console.log(err);
             $cordovaToast.showShortCenter(err);
         }
     }
@@ -1093,7 +1059,7 @@ app.controller('profileCtrl', function ($scope, $rootScope, $state, $ionicHistor
         $cordovaGeolocation
             .getCurrentPosition(posOptions)
             .then(function (position) {
-                console.log(position);
+                //console.log(position);
                 PPHttp.do(
                     'p',
                     'updateLocation', {
@@ -1115,13 +1081,13 @@ app.controller('profileCtrl', function ($scope, $rootScope, $state, $ionicHistor
                                     $scope.bLng = data.result[0].x;
                                     $scope.bLat = data.result[0].y;
                                 } else {
-                                    console.log(data.message);
+                                    //console.log(data.message);
                                     $cordovaToast.showShortCenter(data.message);
                                 }
                             })
                             .
                             error(function (err) {
-                                console.log(err);
+                                //console.log(err);
                                 $cordovaToast.showShortCenter(err);
                             });
                     }
@@ -1182,7 +1148,7 @@ app.controller('conditionSpecialCtrl', function ($scope, $rootScope, $state, $io
             if (targetUsername == 'fake') {
                 PPHttp.do(
                     'p',
-                    'createOrConfirmClickFake', {
+                    'selectFake', {
                         token: $rootScope.r_mainInfo.token
                     },
                     //success
@@ -1200,13 +1166,13 @@ app.controller('conditionSpecialCtrl', function ($scope, $rootScope, $state, $io
                     },
                     //success
                     function (data, status) {
-                        PPHttp.doRefreshAll();
+                        //PPHttp.doRefreshAll();
                         $cordovaToast.showShortCenter('恭喜你!已加入好友列表,赶紧行动吧!');
                     }
                 );
             }
             $ionicHistory.nextViewOptions({
-                disableAnimate: true,
+                //disableAnimate: true,
                 disableBack: true,
                 historyRoot: true
             });
@@ -1217,25 +1183,23 @@ app.controller('conditionSpecialCtrl', function ($scope, $rootScope, $state, $io
         //searchMode == '新建' || '确认'
         else {
             if (targetUsername == 'fake') {
-                $http.put(
-                    $rootScope.serverRoot + 'fakeSelect', {
-                        username: $rootScope.user.username
-                    }
-                )
-                    .success(function (data, status, headers, config) {
-                        // this callback will be called asynchronously
-                        // when the response is available
-                        $rootScope.showPopup('请仔细选择图片!');
+                PPHttp.do(
+                    'p',
+                    'selectFake', {
+                        token: $rootScope.r_mainInfo.token
+                    },
+                    //success
+                    function (data, status) {
+                        $cordovaToast.showShortCenter('请仔细选择图片!');
                         $ionicHistory.nextViewOptions({
-                            disableAnimate: true,
+                            //disableAnimate: true,
                             disableBack: true,
                             historyRoot: true
                         });
                         $state.go('tab.meet');
                         $scope.modal.hide();
-                    })
-                    .
-                    error($rootScope.ppError);
+                    }
+                );
             } else {
                 $ionicLoading.show({
                     template: '处理中...'
@@ -1243,7 +1207,7 @@ app.controller('conditionSpecialCtrl', function ($scope, $rootScope, $state, $io
                 if ($rootScope.r_searchMode == '确认') {
                     PPHttp.do(
                         'p',
-                        'confirmMeetClickTarget', {
+                        'selectFake', {
                             token: $rootScope.r_mainInfo.token,
                             username: targetUsername,
                             meetId: $rootScope.r_curMeet._id
@@ -1277,7 +1241,7 @@ app.controller('conditionSpecialCtrl', function ($scope, $rootScope, $state, $io
                         },
                         //success
                         function (data, status) {
-                            PPHttp.doRefreshAll();
+                            //PPHttp.doRefreshAll();
                             $ionicHistory.nextViewOptions({
                                 disableAnimate: true,
                                 disableBack: true,
@@ -1300,7 +1264,7 @@ app.controller('conditionSpecialCtrl', function ($scope, $rootScope, $state, $io
     $scope.no = function () {
         if ($rootScope.r_searchMode == '回复' || $rootScope.r_searchMode == '确认') {
             $ionicHistory.nextViewOptions({
-                disableAnimate: true,
+                //disableAnimate: true,
                 disableBack: true,
                 historyRoot: true
             });
@@ -1326,7 +1290,7 @@ app.controller('conditionSpecialCtrl', function ($scope, $rootScope, $state, $io
                 },
                 //success
                 function (data, status) {
-                    PPHttp.doRefreshAll();
+                    //PPHttp.doRefreshAll();
                     $ionicHistory.nextViewOptions({
                         disableAnimate: true,
                         disableBack: true,
@@ -1346,48 +1310,22 @@ app.controller('conditionSpecialCtrl', function ($scope, $rootScope, $state, $io
 
 });
 
-app.controller('contactCtrl', function ($scope, $rootScope, $state, $timeout, $ionicScrollDelegate, PPHttp) {
+app.controller('contactCtrl', function ($scope, $rootScope, $state, $timeout, $ionicScrollDelegate) {
     $scope.clickChat = function (friend) {
-        $scope.readFriend(friend);
-        $rootScope.r_curChatFriendUsername = friend.friendUsername;
-        $rootScope.r_curChatFriendNickname = friend.friendNickname;
-        PPHttp.do(
-            'p',
-            'getMsg', {
-                token: $rootScope.r_mainInfo.token,
-                friendUsername: friend.friendUsername
-            },
-            function (data, status) {
-                $rootScope.r_curChatMsg = data.ppData;
-                $state.go('tab.contact.chat');
-                $timeout(function () {
-                    $ionicScrollDelegate.scrollBottom(true, true);
-                }, 300);
-            }
-        );
+        $rootScope.r_curChatFriendUsername = (friend.username1 == r_mainInfo.user.username ? friend.username2 : friend.username1);
+        $rootScope.r_curChatFriendNickname = (friend.username1 == r_mainInfo.user.username ? friend.nickname2 : friend.nickname1);
+
+        var f1 = r_mainInfo.user.username.toLowerCase();
+        var f2 = friend.friendUsername.toLowerCase();
+        var key = f1 > f2 ? f2 + "_" + f1 : f1 + "_" + f2;
+
+        $rootScope.r_curCouple = key;
+
+        $state.go('tab.contact.chat');
+        $timeout(function () {
+            $ionicScrollDelegate.scrollBottom(true, true);
+        }, 300);
     }
-
-    $scope.readFriend = function (friend) {
-        friend.unread = false;
-        PPHttp.do(
-            'p',
-            'readFriend', {
-                token: $rootScope.r_mainInfo.token,
-                friendId: friend._id
-            }
-        );
-    };
-
-    $scope.doRefresh = function () {
-        PPHttp
-            .doRefreshAll()
-            .finally(
-            function () {
-                $scope.$broadcast('scroll.refreshComplete');
-                //$scope.$apply();
-            }
-        );
-    };
 });
 
 app.controller('chatCtrl', function ($scope, $rootScope, $state, $stateParams, $timeout, $ionicScrollDelegate, PPHttp) {
@@ -1403,16 +1341,12 @@ app.controller('chatCtrl', function ($scope, $rootScope, $state, $stateParams, $
             'readMsg', {
                 token: $rootScope.r_mainInfo.token,
                 friendUsername: $rootScope.r_curChatFriendUsername
-            },
-            function (data, status) {
-                $rootScope.r_mainInfo.unreadMsgCounts[$rootScope.r_curChatFriendUsername] = 0;
             }
         )
             .finally(
             function () {
                 $rootScope.r_curChatFriendUsername = null;
                 $rootScope.r_curChatFriendNickname = null;
-                $rootScope.r_curChatMsg = null;
                 $state.go('tab.contact');
             }
         );
@@ -1431,20 +1365,10 @@ app.controller('chatCtrl', function ($scope, $rootScope, $state, $stateParams, $
                 content: $scope.inputMessage
             },
             function (data, status) {
-                PPHttp.do(
-                    'p',
-                    'getMsg', {
-                        token: $rootScope.r_mainInfo.token,
-                        friendUsername: $rootScope.r_curChatFriendUsername
-                    },
-                    function (data, status) {
-                        $rootScope.r_curChatMsg = data.ppData;
-                        $scope.inputMessage = '';
-                        $timeout(function () {
-                            $ionicScrollDelegate.scrollBottom(true, true);
-                        }, 300);
-                    }
-                );
+                $scope.inputMessage = '';
+                $timeout(function () {
+                    $ionicScrollDelegate.scrollBottom(true, true);
+                }, 300);
             }
         );
     };
