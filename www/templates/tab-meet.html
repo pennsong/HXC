@@ -10,7 +10,7 @@
     <ion-content>
         <div class="list">
             <a class="item item-thumbnail-left" ng-class="{unread:unread(item)}" href="#" ng-repeat="item in r_meets | orderBy: '-_id' " ng-click="clickMeet(item)">
-                <img ng-src="{{r_imagePath + 'normal/' + item.logo}}">
+                <img ng-src="{{logo(item)}}">
                 <h2>{{item.mapLoc.name}}</h2>
                 <p>{{item.mapLoc.address}}</p>
                 <p>{{item.status}}</p>

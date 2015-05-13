@@ -553,6 +553,35 @@ app.controller('meetCtrl', function ($scope, $rootScope, $state, $ionicModal, $i
         }
     );
 
+    $scope.unread = function(item){
+        if ($rootScope.r_mainInfo.user.username == item.createrUsername)
+        {
+            return item.createrUnread;
+        }
+        else if ($rootScope.r_mainInfo.user.username == item.targetUsername)
+        {
+            return item.targetUnread;
+        }
+    };
+
+    $scope.logo = function(item){
+        if ($rootScope.r_mainInfo.user.username == item.createrUsername)
+        {
+            if (item.status == "待确认")
+            {
+                return $rootScope.r_imagePath + "normal/tbd.jpeg";
+            }
+            else if (item.status == "待回复")
+            {
+                return $rootScope.r_imagePath + "normal/" + item.targetSpecialPic;
+            }
+        }
+        else if ($rootScope.r_mainInfo.user.username == item.targetUsername)
+        {
+            return $rootScope.r_imagePath + "normal/x.jpeg";
+        }
+    }
+
     $scope.readMeet = function (meet) {
         if (
             (meet.createrUsername == $rootScope.r_mainInfo.user.username && meet.createrUnread == true)
@@ -1207,7 +1236,7 @@ app.controller('conditionSpecialCtrl', function ($scope, $rootScope, $state, $io
                 if ($rootScope.r_searchMode == '确认') {
                     PPHttp.do(
                         'p',
-                        'selectFake', {
+                        'confirmMeetClickTarget', {
                             token: $rootScope.r_mainInfo.token,
                             username: targetUsername,
                             meetId: $rootScope.r_curMeet._id
@@ -1312,11 +1341,11 @@ app.controller('conditionSpecialCtrl', function ($scope, $rootScope, $state, $io
 
 app.controller('contactCtrl', function ($scope, $rootScope, $state, $timeout, $ionicScrollDelegate) {
     $scope.clickChat = function (friend) {
-        $rootScope.r_curChatFriendUsername = (friend.username1 == r_mainInfo.user.username ? friend.username2 : friend.username1);
-        $rootScope.r_curChatFriendNickname = (friend.username1 == r_mainInfo.user.username ? friend.nickname2 : friend.nickname1);
+        $rootScope.r_curChatFriendUsername = (friend.username1 == $rootScope.r_mainInfo.user.username ? friend.username2 : friend.username1);
+        $rootScope.r_curChatFriendNickname = (friend.username1 == $rootScope.r_mainInfo.user.username ? friend.nickname2 : friend.nickname1);
 
-        var f1 = r_mainInfo.user.username.toLowerCase();
-        var f2 = friend.friendUsername.toLowerCase();
+        var f1 = $rootScope.r_mainInfo.user.username.toLowerCase();
+        var f2 = $rootScope.r_curChatFriendUsername.toLowerCase();
         var key = f1 > f2 ? f2 + "_" + f1 : f1 + "_" + f2;
 
         $rootScope.r_curCouple = key;
@@ -1325,7 +1354,25 @@ app.controller('contactCtrl', function ($scope, $rootScope, $state, $timeout, $i
         $timeout(function () {
             $ionicScrollDelegate.scrollBottom(true, true);
         }, 300);
+    };
+
+    $scope.unreadCount = function(friend){
+        var f1 = friend.username1.toLowerCase();
+        var f2 = friend.username2.toLowerCase();
+        var key = f1 > f2 ? f2 + "_" + f1 : f1 + "_" + f2;
+        var tmpArray = $rootScope.r_messages[key].filter(function(item) {
+            return item.from != $rootScope.r_mainInfo.user.username && item.unread;
+        });
+        return tmpArray.length;
     }
+
+    $scope.friendLogo = function(friend){
+        return friend.username1 == $rootScope.r_mainInfo.user.username ? friend.friendLogo2 : friend.friendLogo1;
+    };
+
+    $scope.friendNickname = function(friend){
+        return friend.username1 == $rootScope.r_mainInfo.user.username ? friend.nickname2 : friend.nickname1;
+    };
 });
 
 app.controller('chatCtrl', function ($scope, $rootScope, $state, $stateParams, $timeout, $ionicScrollDelegate, PPHttp) {
@@ -1365,6 +1412,8 @@ app.controller('chatCtrl', function ($scope, $rootScope, $state, $stateParams, $
                 content: $scope.inputMessage
             },
             function (data, status) {
+                console.log($rootScope.r_messages);
+
                 $scope.inputMessage = '';
                 $timeout(function () {
                     $ionicScrollDelegate.scrollBottom(true, true);

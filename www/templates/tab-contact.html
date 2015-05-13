@@ -1,16 +1,12 @@
 <ion-view view-title="联系人">
     <ion-content>
-        <ion-refresher pulling-text="下拉刷新" on-refresh="doRefresh()">
-        </ion-refresher>
         <div class="list">
-            <!--<a class="item item-avatar-left" href="#" ng-repeat="(key, friend) in friends" ng-click="clickChat(key)">-->
-                <!--<img ng-src="{{imagePath + 'normal/' + (friend.creater.username == user.username ? friend.target.specialPic : friend.creater.specialPic)}}">-->
-                <!--<h2>{{friend.creater.username == user.username ? friend.target.nickname : friend.creater.nickname}}</h2>-->
-            <!--</a>-->
-            <a class="item item-avatar-left" ng-class="{unread:item.unread}" href="#" ng-repeat="item in r_mainInfo.friends" ng-click="clickChat(item)">
-                <img ng-src="{{r_imagePath + 'normal/' + r_mainInfo.friendPics[item.friendUsername]}}">
-                <h2>{{item.friendNickname}}</h2>
-                <span class="badge badge-assertive" ng-show="r_mainInfo.unreadMsgCounts[item.friendUsername] > 0">{{r_mainInfo.unreadMsgCounts[item.friendUsername]}}</span>
+            <a class="item item-avatar-left" ng-class="{unread:item.unread}" href="#" ng-repeat="item in r_friends" ng-click="clickChat(item)">
+                <img ng-src="{{r_imagePath + 'normal/' + friendLogo(item)}}">
+                <h2>{{friendNickname(item)}}</h2>
+                <span class="badge badge-assertive" ng-show="unreadCount(item) > 0">
+                    {{unreadCount(item)}}
+                </span>
             </a>
         </div>
     </ion-content>
