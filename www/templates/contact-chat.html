@@ -10,10 +10,10 @@
              class="messages">
 
             <div class="message" ng-class="{'slide-right': !showTime, '': showTime}">
-                <span class="message">{{ message.content }}</span>
+                <span class="message">{{ message.content }}{{readMsg(message)}}</span>
             </div>
 
-            <div am-time-ago="{{message._id | objectIDtoDate }}" class="time" ng-class="{'slide-right': !showTime, '': showTime}"></div>
+            <div am-time-ago="{{message.time | stringToDate }}" class="time" ng-class="{'slide-right': !showTime, '': showTime}"></div>
 
         </div>
 

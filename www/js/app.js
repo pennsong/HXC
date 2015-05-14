@@ -45,6 +45,13 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment', 'fir
 
             $rootScope.r_hxMessages = new Firebase('https://hxbase.firebaseio.com/messages');
             $rootScope.r_messages = {};
+            $rootScope.r_messagesUnreadCount = {};
+            $rootScope.r_messagesTotalUnreadCount = function () {
+                return Object.keys( $rootScope.r_messagesUnreadCount )
+                    .reduce( function( sum, key ){
+                        return sum + parseFloat( $rootScope.r_messagesUnreadCount[key] );
+                    }, 0 );
+            };
 
             $rootScope.r_curMeet = null;
 
@@ -412,7 +419,7 @@ app.controller('loginCtrl', function ($scope, $rootScope, $state, $cordovaToast,
 
                 $rootScope.r_hxFromFriends.$watch(
                     function(event) {
-                        //console.log(event);
+                        console.log(event);
                         //console.log(ta.$getRecord(event.key));
                         if (event.event == 'child_added')
                         {
@@ -423,7 +430,11 @@ app.controller('loginCtrl', function ($scope, $rootScope, $state, $cordovaToast,
                             var f2 = record.username2.toLowerCase();
                             var key = f1 > f2 ? f2 + "_" + f1 : f1 + "_" + f2;
 
-                            $rootScope.r_messages[key] = $firebaseArray($rootScope.r_hxMessages.orderByChild("couple").equalTo(key));
+                            $rootScope.r_messages[key] = $firebaseArray(new Firebase('https://hxbase.firebaseio.com/messages/'+key));
+                            $rootScope.r_messages[key].$watch(function(event){
+                                console.log(event);
+                                console.log($rootScope.r_messages[key].$getRecord(event.key));
+                            });
                         }
                         else if (event.event == 'child_removed')
                         {
@@ -443,7 +454,7 @@ app.controller('loginCtrl', function ($scope, $rootScope, $state, $cordovaToast,
 
                 $rootScope.r_hxToFriends.$watch(
                     function(event) {
-                        //console.log(event);
+                        console.log(event);
                         //console.log(ta.$getRecord(event.key));
                         if (event.event == 'child_added')
                         {
@@ -454,7 +465,11 @@ app.controller('loginCtrl', function ($scope, $rootScope, $state, $cordovaToast,
                             var f2 = record.username2.toLowerCase();
                             var key = f1 > f2 ? f2 + "_" + f1 : f1 + "_" + f2;
 
-                            $rootScope.r_messages[key] = $firebaseArray($rootScope.r_hxMessages.orderByChild("couple").equalTo(key));
+                            $rootScope.r_messages[key] = $firebaseArray(new Firebase('https://hxbase.firebaseio.com/messages/'+key));
+                            $rootScope.r_messages[key].$watch(function(event){
+                                console.log(event);
+                                console.log($rootScope.r_messages[key].$getRecord(event.key));
+                            });
                         }
                         else if (event.event == 'child_removed')
                         {
@@ -1363,8 +1378,9 @@ app.controller('contactCtrl', function ($scope, $rootScope, $state, $timeout, $i
         var tmpArray = $rootScope.r_messages[key].filter(function(item) {
             return item.from != $rootScope.r_mainInfo.user.username && item.unread;
         });
+        $rootScope.r_messagesUnreadCount[key] = tmpArray.length;
         return tmpArray.length;
-    }
+    };
 
     $scope.friendLogo = function(friend){
         return friend.username1 == $rootScope.r_mainInfo.user.username ? friend.friendLogo2 : friend.friendLogo1;
@@ -1399,27 +1415,31 @@ app.controller('chatCtrl', function ($scope, $rootScope, $state, $stateParams, $
         );
     };
 
+    $scope.readMsg = function(item){
+        if (item.unread && item.to == $rootScope.r_mainInfo.user.username)
+        {
+            item.unread = false;
+            $rootScope.r_messages[$rootScope.r_curCouple].$save(item);
+        }
+    };
+
     $scope.sendMessage = function () {
         if (!$scope.inputMessage) {
             return;
         }
 
-        PPHttp.do(
-            'p',
-            'sendMsg', {
-                token: $rootScope.r_mainInfo.token,
-                friendUsername: $rootScope.r_curChatFriendUsername,
-                content: $scope.inputMessage
-            },
-            function (data, status) {
-                console.log($rootScope.r_messages);
+        $rootScope.r_messages[$rootScope.r_curCouple].$add({
+            from: $rootScope.r_mainInfo.user.username,
+            to: $rootScope.r_curChatFriendUsername,
+            content: $scope.inputMessage,
+            unread: true,
+            time: Firebase.ServerValue.TIMESTAMP
+        });
 
-                $scope.inputMessage = '';
-                $timeout(function () {
-                    $ionicScrollDelegate.scrollBottom(true, true);
-                }, 300);
-            }
-        );
+        $scope.inputMessage = '';
+        $timeout(function () {
+            $ionicScrollDelegate.scrollBottom(true, true);
+        }, 300);
     };
 
 
