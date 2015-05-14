@@ -1069,7 +1069,7 @@ app.controller('meetInfoCtrl', function ($scope, $rootScope, $state, $ionicModal
 
                     $cordovaFileTransfer.upload($rootScope.r_serverRoot + 'users/uploadSpecialPic', fileURL, options, true)
                         .then(function (result) {
-                            $rootScope.r_mainInfo.user.specialPic = (JSON.parse(result.response))["ppResult"];
+                            $rootScope.r_mainInfo.user.specialPic = (JSON.parse(result.response))["ppData"];
                             $rootScope.r_mainInfo.user.specialPicDisplay = $rootScope.r_mainInfo.user.specialPic;
                             //console.log($rootScope.r_mainInfo.user.specialPic);
                         }, function (err) {
