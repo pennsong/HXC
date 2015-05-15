@@ -9,11 +9,11 @@
     </ion-nav-buttons>
     <ion-content>
         <div class="list">
-            <a class="item item-thumbnail-left" ng-class="{unread:unread(item)}" href="#" ng-repeat="item in r_meets | orderBy: '-_id' " ng-click="clickMeet(item)">
+            <a class="item item-thumbnail-left" ng-class="{unread:item.targetUnread}" href="#" ng-repeat="item in r_meets | orderBy: '-_id' " ng-click="clickMeet(item)">
                 <img ng-src="{{logo(item)}}" badge="1" badge-style="badge-assertive">
                 <h2>{{item.mapLoc.name}}</h2>
                 <p>{{item.mapLoc.address}}</p>
-                <p>{{item.status}}</p>
+		<p>{{item.status}}</p>
                 <p><span am-time-ago="{{item._id | objectIDtoDate }}"></span></p>
             </a>
         </div>

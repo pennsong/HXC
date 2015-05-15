@@ -22,7 +22,7 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment', 'fir
 
             $rootScope.r_hxMeets = new Firebase('https://hxbase.firebaseio.com/meets');
             $rootScope.r_hxCreaterMeets = null;
-            $rootScope.r_hxtargetMeets = null;
+            $rootScope.r_hxTargetMeets = null;
             $rootScope.r_meets = {};
 
             $rootScope.r_hxFriends = new Firebase('https://hxbase.firebaseio.com/friends');
@@ -391,15 +391,15 @@ app.controller('loginCtrl', function ($scope, $rootScope, $state, $cordovaToast,
                     }
                 );
 
-                $rootScope.r_hxtargetMeets = $firebaseArray($rootScope.r_hxMeets.orderByChild("targetUsername").equalTo(user.username));
+                $rootScope.r_hxTargetMeets = $firebaseArray($rootScope.r_hxMeets.orderByChild("targetUsername").equalTo(user.username));
 
-                $rootScope.r_hxtargetMeets.$watch(
+                $rootScope.r_hxTargetMeets.$watch(
                     function(event) {
                         //console.log(event);
-                        //console.log($rootScope.r_hxCreaterMeets.$getRecord(event.key));
+                        //console.log($rootScope.r_hxTargetMeets.$getRecord(event.key));
                         if (event.event == 'child_added')
                         {
-                            $scope.r_meets[event.key] = ($rootScope.r_hxtargetMeets.$getRecord(event.key));
+                            $scope.r_meets[event.key] = ($rootScope.r_hxTargetMeets.$getRecord(event.key));
                         }
                         else if (event.event == 'child_removed')
                         {
@@ -570,17 +570,6 @@ app.controller('meetCtrl', function ($scope, $rootScope, $state, $ionicModal, $i
         }
     );
 
-    $scope.unread = function(item){
-        if ($rootScope.r_mainInfo.user.username == item.createrUsername)
-        {
-            return item.createrUnread;
-        }
-        else if ($rootScope.r_mainInfo.user.username == item.targetUsername)
-        {
-            return item.targetUnread;
-        }
-    };
-
     $scope.logo = function(item){
         if ($rootScope.r_mainInfo.user.username == item.createrUsername)
         {
@@ -600,20 +589,11 @@ app.controller('meetCtrl', function ($scope, $rootScope, $state, $ionicModal, $i
     }
 
     $scope.readMeet = function (meet) {
-        if (
-            (meet.createrUsername == $rootScope.r_mainInfo.user.username && meet.createrUnread == true)
-            ||
-            (meet.targetUsername == $rootScope.r_mainInfo.user.username && meet.targetUnread == true)
-        )
+        if (meet.targetUnread == true && meet.targetUsername == $rootScope.r_mainInfo.user.username)
         {
-            PPHttp.do(
-                'p',
-                'readMeet', {
-                    token: $rootScope.r_mainInfo.token,
-                    meetId: meet._id
-                }
-            );
-        }
+	    meet.targetUnread = false;
+	    $rootScope.r_hxTargetMeets.$save(meet);
+	}
     };
 
     $scope.clickMeet = function (meet) {
