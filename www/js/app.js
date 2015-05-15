@@ -16,14 +16,7 @@ var app = angular.module('starter', ['ionic', 'ngCordova', 'angularMoment', 'fir
             $rootScope.r_serverRoot = "http://192.168.1.16:3000/";
 
             $rootScope.r_amOnline = new Firebase('https://hxbase.firebaseio.com/.info/connected');
-            $rootScope.r_userRef = new Firebase('https://hxbase.firebaseio.com/online');
-
-            $rootScope.r_amOnline.on('value', function(snapshot) {
-                if (snapshot.val()) {
-                    $rootScope.r_userRef.onDisconnect().remove();
-                    $rootScope.r_userRef.set(true);
-                }
-            });
+            $rootScope.r_userRef = null;
 
             $rootScope.r_newUser = null;
 
@@ -514,6 +507,15 @@ app.controller('loginCtrl', function ($scope, $rootScope, $state, $cordovaToast,
                 $rootScope.r_bgGeo.start();
 
                 $rootScope.r_mainInfo = data.ppData;
+                $rootScope.r_amOnline = new Firebase('https://hxbase.firebaseio.com/.info/connected');
+                $rootScope.r_userRef = new Firebase('https://hxbase.firebaseio.com/online/' + $rootScope.r_mainInfo.user.username);
+
+                $rootScope.r_amOnline.on('value', function(snapshot) {
+                    if (snapshot.val()) {
+                        $rootScope.r_userRef.onDisconnect().remove();
+                        $rootScope.r_userRef.set(true);
+                    }
+                });
                 //console.log(data.ppData);
                 window.localStorage['username'] = data.ppData.user.username;
                 window.localStorage['nickname'] = data.ppData.user.nickname;
@@ -1399,20 +1401,9 @@ app.controller('chatCtrl', function ($scope, $rootScope, $state, $stateParams, $
     var isIOS = ionic.Platform.isWebView() && ionic.Platform.isIOS();
 
     $scope.myGoBack = function () {
-        PPHttp.do(
-            'p',
-            'readMsg', {
-                token: $rootScope.r_mainInfo.token,
-                friendUsername: $rootScope.r_curChatFriendUsername
-            }
-        )
-            .finally(
-            function () {
-                $rootScope.r_curChatFriendUsername = null;
-                $rootScope.r_curChatFriendNickname = null;
-                $state.go('tab.contact');
-            }
-        );
+        $rootScope.r_curChatFriendUsername = null;
+        $rootScope.r_curChatFriendNickname = null;
+        $state.go('tab.contact');
     };
 
     $scope.readMsg = function(item){
@@ -1428,13 +1419,7 @@ app.controller('chatCtrl', function ($scope, $rootScope, $state, $stateParams, $
             return;
         }
 
-        $rootScope.r_messages[$rootScope.r_curCouple].$add({
-            from: $rootScope.r_mainInfo.user.username,
-            to: $rootScope.r_curChatFriendUsername,
-            content: $scope.inputMessage,
-            unread: true,
-            time: Firebase.ServerValue.TIMESTAMP
-        });
+        PPHttp.sendPushMessage($rootScope.r_curChatFriendUsername, $scope.inputMessage);
 
         $scope.inputMessage = '';
         $timeout(function () {
@@ -1523,20 +1508,59 @@ app.factory('PPHttp', function ($rootScope, $http, $cordovaToast) {
                         .error(e);
             }
         },
-        doRefreshAll: function () {
-            return $http.post($rootScope.r_serverRoot + "users/" + "getAll", {
-                token: $rootScope.r_mainInfo.token
-            })
-                .success(
-                function (data, status) {
-                    $rootScope.r_mainInfo.meets = data.ppData.meets;
-                    $rootScope.r_mainInfo.friends = data.ppData.friends.main;
-                    $rootScope.r_mainInfo.friendPics = data.ppData.friends.pics;
-                    $rootScope.r_mainInfo.unreadMsgCounts = data.ppData.friends.unreadMsgCounts;
-                    console.log($rootScope.r_mainInfo);
+        sendPushMessage: function(username, content){
+            $rootScope.r_messages[$rootScope.r_curCouple].$add({
+                from: $rootScope.r_mainInfo.user.username,
+                to: $rootScope.r_curChatFriendUsername,
+                content: content,
+                unread: true,
+                time: Firebase.ServerValue.TIMESTAMP
+            });
+
+            var fb = new Firebase('https://hxbase.firebaseio.com/online/' + username);
+            fb.once('value', function(dataSnapshot) {
+                console.log(dataSnapshot.val());
+                //对方不在线时发push消息
+                if (!dataSnapshot.val()){
+                    $cordovaToast.showShortCenter('离线消息发送');
+                    $http({
+                        method: 'POST',
+                        url: 'https://api.jpush.cn/v3/push',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: 'Basic ZGU5Yzc4NWVjZGQ0YjBhMzQ4ZWQ0OWEwOjIyMDViOTZiNTJiMjM4MmMwMDBmMGI0Ng=='
+                        },
+                        data: {
+                            "platform": "all",
+                            "audience" : {
+                                "alias" : [username]
+                            },
+                            "notification" : {
+
+                                "android" : {
+                                    "alert" : content,
+                                    "title":"Send to Android",
+                                    "builder_id":1,
+                                    "extras" : { "newsid" : 321}
+
+                                },
+                                "ios" : {
+                                    "alert" : content,
+                                    "sound":"default",
+                                    "badge":"+1",
+                                    "extras" : { "newsid" : 321}
+                                }
+                            },
+                            "options" : {
+                                "time_to_live" : 60,"apns_production":false
+                            }
+                        }
+                    })
+                        .success(handleSuccess)
+                        .error(handleErr);
                 }
-            )
-                .error(handleErr);
+            });
+
         }
     };
 });
