@@ -14,7 +14,8 @@
                 <h2>{{item.mapLoc.name}}</h2>
                 <p>{{item.mapLoc.address}}</p>
 		<p>{{item.status}}</p>
-                <p><span am-time-ago="{{item._id | objectIDtoDate }}"></span></p>
+                <p><span am-time-ago="{{item._id | objectIDtoDate }}"></span>
+		:<span ng-if="item.confirmTime" am-time-ago="{{item.confirmTime | stringToDate}}"></span></p>
             </a>
         </div>
     </ion-content>
